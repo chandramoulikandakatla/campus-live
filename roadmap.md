@@ -1,0 +1,5 @@
+- [ ] Fix delivery-slot selection and real order placement first, with visible confirmation and order progress.
+- [ ] Make completed order records visible in the parent portal using the available account and data permissions.
+- [ ] Complete the welcome, student sign-in, home, live shop, and order tracking journey.
+- [ ] Wire protected kiosk navigation, apply product metadata, and retire obsolete mock screens.
+- [ ] Verify checkout, order history, parent visibility, and sign-in in the preview.

@@ -1,0 +1,306 @@
+@import "@fontsource/outfit/300.css";
+@import "@fontsource/outfit/400.css";
+@import "@fontsource/outfit/500.css";
+@import "@fontsource/outfit/600.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* CampusKart Kiosk — neutral-first premium retail */
+
+    /* Ink #111111 as primary */
+    --primary: 0 0% 7%;
+    --primary-foreground: 40 20% 96%;
+    --primary-glow: 0 0% 18%;
+    --primary-muted: 40 14% 90%;
+
+    /* Secondary: warm stone */
+    --secondary: 40 10% 88%;
+    --secondary-foreground: 0 0% 7%;
+    --secondary-muted: 40 14% 93%;
+
+    /* Accent: restrained deep bronze for CTAs */
+    --accent: 28 34% 44%;
+    --accent-foreground: 40 30% 97%;
+    --accent-glow: 28 34% 54%;
+
+    /* Base: paper #F7F6F2 */
+    --background: 45 20% 96%;
+    --foreground: 0 0% 7%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
+    --card-hover: 45 20% 98%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+
+    --muted: 42 14% 92%;
+    --muted-foreground: 30 5% 42%;
+
+    --border: 40 10% 87%;
+    --input: 40 10% 87%;
+    --ring: 0 0% 7%;
+
+    --destructive: 6 55% 45%;
+    --destructive-foreground: 40 30% 97%;
+
+    --success: 150 30% 32%;
+    --success-foreground: 40 30% 97%;
+    --warning: 34 62% 46%;
+    --warning-foreground: 40 30% 97%;
+    --info: 210 20% 38%;
+    --info-foreground: 40 30% 97%;
+
+    --in-stock: 150 30% 32%;
+    --limited: 34 62% 46%;
+    --out-of-stock: 30 4% 62%;
+
+    --glass: 45 20% 96% / 0.82;
+    --glass-border: 40 10% 87% / 0.7;
+
+    --gradient-hero: linear-gradient(140deg, hsl(0 0% 10%) 0%, hsl(0 0% 20%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(45 20% 97%) 100%);
+    --gradient-cta: linear-gradient(140deg, hsl(0 0% 12%) 0%, hsl(0 0% 24%) 100%);
+    --gradient-trust: linear-gradient(140deg, hsl(45 20% 94%) 0%, hsl(40 12% 88%) 100%);
+
+    --shadow-sm: 0 1px 2px hsl(0 0% 7% / 0.05);
+    --shadow-md: 0 6px 18px hsl(0 0% 7% / 0.07);
+    --shadow-lg: 0 14px 40px hsl(0 0% 7% / 0.09);
+    --shadow-xl: 0 26px 70px hsl(0 0% 7% / 0.12);
+    --shadow-glow: 0 18px 50px hsl(0 0% 7% / 0.18);
+    --shadow-accent: 0 10px 30px hsl(28 34% 44% / 0.25);
+
+    --font-display: 'Outfit', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+
+    --radius: 1rem;
+    --radius-lg: 1.5rem;
+    --radius-xl: 2rem;
+
+    /* Kiosk touch targets */
+    --touch-sm: 48px;
+    --touch-md: 56px;
+    --touch-lg: 72px;
+
+    --sidebar-background: 45 20% 97%;
+    --sidebar-foreground: 0 0% 7%;
+    --sidebar-primary: 0 0% 7%;
+    --sidebar-primary-foreground: 40 20% 96%;
+    --sidebar-accent: 42 14% 92%;
+    --sidebar-accent-foreground: 0 0% 7%;
+    --sidebar-border: 40 10% 87%;
+    --sidebar-ring: 0 0% 7%;
+  }
+
+  .dark {
+    --primary: 40 20% 96%;
+    --primary-foreground: 0 0% 7%;
+    --primary-glow: 40 20% 88%;
+    --primary-muted: 0 0% 16%;
+
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 40 20% 96%;
+    --secondary-muted: 0 0% 13%;
+
+    --accent: 28 40% 58%;
+    --accent-foreground: 0 0% 7%;
+    --accent-glow: 28 40% 66%;
+
+    --background: 0 0% 7%;
+    --foreground: 40 16% 94%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 40 16% 94%;
+    --card-hover: 0 0% 13%;
+
+    --popover: 0 0% 10%;
+    --popover-foreground: 40 16% 94%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 40 6% 65%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 40 20% 90%;
+
+    --destructive: 6 60% 52%;
+    --destructive-foreground: 40 20% 96%;
+
+    --success: 150 32% 46%;
+    --warning: 34 62% 56%;
+    --info: 210 24% 62%;
+
+    --in-stock: 150 32% 46%;
+    --limited: 34 62% 56%;
+    --out-of-stock: 0 0% 40%;
+
+    --glass: 0 0% 8% / 0.8;
+    --glass-border: 0 0% 22% / 0.7;
+
+    --gradient-hero: linear-gradient(140deg, hsl(0 0% 12%) 0%, hsl(0 0% 6%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 11%) 0%, hsl(0 0% 8%) 100%);
+    --gradient-cta: linear-gradient(140deg, hsl(40 20% 96%) 0%, hsl(40 14% 86%) 100%);
+    --gradient-trust: linear-gradient(140deg, hsl(0 0% 14%) 0%, hsl(0 0% 9%) 100%);
+
+    --sidebar-background: 0 0% 9%;
+    --sidebar-foreground: 40 16% 94%;
+    --sidebar-primary: 40 20% 96%;
+    --sidebar-primary-foreground: 0 0% 7%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 40 16% 94%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 40 20% 90%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-semibold tracking-tight;
+  }
+
+  /* Kiosk: no text selection drag, no hover-only affordances */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .touch-target {
+    min-height: var(--touch-sm);
+    min-width: var(--touch-sm);
+  }
+
+  .touch-target-md {
+    min-height: var(--touch-md);
+    min-width: var(--touch-md);
+  }
+
+  .touch-target-lg {
+    min-height: var(--touch-lg);
+  }
+
+  .glass {
+    background: hsl(var(--glass));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .glass-strong {
+    background: hsl(var(--glass));
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-cta {
+    background: var(--gradient-cta);
+  }
+
+  .gradient-trust {
+    background: var(--gradient-trust);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-accent {
+    box-shadow: var(--shadow-accent);
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.65;
+    }
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+}
