@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { mockProducts } from '@/lib/store';
 
 import snacks from '@/assets/cat-snacks.jpg';
 import sweet from '@/assets/cat-sweet.jpg';
@@ -80,16 +80,21 @@ export function stockState(p: Product): StockState {
 
 export function useProducts() {
   return useQuery({
-    queryKey: ['products'],
-    queryFn: async (): Promise<Product[]> => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('is_active', true)
-        .order('sku');
-      if (error) throw error;
-      return (data ?? []) as Product[];
-    },
+    queryKey: ['products', 'demo'],
+    queryFn: async (): Promise<Product[]> => mockProducts.map((product, index) => ({
+      id: product.id,
+      sku: `CK-${String(index + 1).padStart(3, '0')}`,
+      name: product.name,
+      category: product.category,
+      subcategory: null,
+      brand: null,
+      price: product.price,
+      unit: product.unit,
+      image_url: null,
+      stock_quantity: product.availability === 'out-of-stock' ? 0 : product.availability === 'limited' ? 3 : 25,
+      reorder_threshold: 5,
+      is_active: true,
+    })),
     staleTime: 30_000,
   });
 }

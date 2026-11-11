@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, User, Menu, X, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { CampusSelector } from '@/components/CampusSelector';
 import { useStore } from '@/lib/store';
 
@@ -54,6 +55,7 @@ export function Navbar() {
           {/* Right Section */}
           <div className="flex items-center gap-3">
             <CampusSelector />
+            <Badge variant="secondary" className="hidden sm:inline-flex">Demo preview</Badge>
 
             {/* Search - Desktop */}
             <Link

@@ -79,6 +79,7 @@ export default function ParentDashboard() {
                   <Shield className="w-5 h-5 text-secondary-foreground" />
                 </div>
                 <Badge variant="verified">Parent Portal</Badge>
+                <Badge variant="secondary">Sample demo data</Badge>
               </div>
               <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
                 Spending Control Center

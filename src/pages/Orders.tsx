@@ -17,7 +17,7 @@ const mockOrders: Order[] = [
     total: 140,
     status: 'on-the-way',
     createdAt: new Date(),
-    estimatedDelivery: '10 mins',
+    estimatedDelivery: 'Same-day slot: 12:00 - 12:30 PM',
   },
   {
     id: 'ORD-002',
@@ -38,7 +38,7 @@ const mockOrders: Order[] = [
     total: 140,
     status: 'packed',
     createdAt: new Date(Date.now() - 3600000),
-    estimatedDelivery: '5 mins',
+    estimatedDelivery: 'Same-day slot: 03:00 - 03:30 PM',
   },
 ];
 
@@ -70,7 +70,7 @@ export default function Orders() {
             <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
               Your Orders
             </h1>
-            <p className="text-muted-foreground mt-1">Track and manage your orders</p>
+            <p className="text-muted-foreground mt-1">Explore sample order tracking in this interactive prototype</p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">

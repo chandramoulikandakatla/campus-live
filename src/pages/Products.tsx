@@ -20,7 +20,7 @@ const filters = [
 export default function Products() {
   const [searchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('search') ?? '');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 

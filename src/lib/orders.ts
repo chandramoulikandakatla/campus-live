@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/lib/auth';
+import { useStore } from '@/lib/store';
 
 export interface OrderItem {
   id: string;
@@ -23,35 +22,28 @@ export interface ShopOrder {
   items: OrderItem[];
 }
 
+/** Orders are stored only in this browser for the frontend demonstration. */
 export function useOrders() {
-  const { user } = useAuth();
-
+  const orders = useStore((state) => state.orders);
   return useQuery({
-    queryKey: ['orders', user?.id],
-    enabled: Boolean(user),
-    queryFn: async (): Promise<ShopOrder[]> => {
-      if (!user) return [];
-
-      const { data: orderRows, error: ordersError } = await supabase
-        .from('orders')
-        .select('id, order_number, status, total, delivery_slot, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      if (ordersError) throw ordersError;
-
-      const rows = orderRows ?? [];
-      if (rows.length === 0) return [];
-
-      const { data: items, error: itemsError } = await supabase
-        .from('order_items')
-        .select('id, order_id, product_id, product_name, sku, unit_price, quantity, line_total')
-        .in('order_id', rows.map((order) => order.id));
-      if (itemsError) throw itemsError;
-
-      return rows.map((order) => ({
-        ...order,
-        items: (items ?? []).filter((item) => item.order_id === order.id),
-      }));
-    },
+    queryKey: ['orders', 'local-demo', orders.length],
+    queryFn: async (): Promise<ShopOrder[]> => orders.map((order) => ({
+      id: order.id,
+      order_number: order.id,
+      status: order.status,
+      total: order.total,
+      delivery_slot: order.deliverySlot ?? order.estimatedDelivery,
+      created_at: order.createdAt instanceof Date ? order.createdAt.toISOString() : new Date(order.createdAt).toISOString(),
+      items: order.items.map((item, index) => ({
+        id: `${order.id}-${index}`,
+        order_id: order.id,
+        product_id: item.product.id,
+        product_name: item.product.name,
+        sku: item.product.id,
+        unit_price: item.product.price,
+        quantity: item.quantity,
+        line_total: item.product.price * item.quantity,
+      })),
+    })),
   });
 }

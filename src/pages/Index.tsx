@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Shield, Clock, Users, Smartphone, ChevronRight, Zap, Heart, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,7 +43,14 @@ const stats = [
 
 export default function Index() {
   const { selectedCampus } = useStore();
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
   const featuredProducts = mockProducts.slice(0, 8);
+
+  const submitSearch = () => {
+    const query = searchQuery.trim();
+    navigate(query ? `/products?search=${encodeURIComponent(query)}` : '/products');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -106,6 +114,9 @@ export default function Index() {
                 <Input
                   variant="large"
                   placeholder="Search for fruits, snacks, essentials..."
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onKeyDown={(event) => { if (event.key === 'Enter') submitSearch(); }}
                   className="pl-12 pr-4"
                 />
               </div>

@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# Local environment files
+# Local environment files (not needed by the frontend-only demo)
 .env
 .env.*
 !.env.example

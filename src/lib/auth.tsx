@@ -1,7 +1,15 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+
+export interface DemoUser {
+  id: string;
+  email: string;
+  user_metadata: { student_id: string; full_name: string; campus: string };
+}
+
+export interface DemoSession {
+  user: DemoUser;
+}
 
 export interface Profile {
   id: string;
@@ -12,74 +20,66 @@ export interface Profile {
 }
 
 interface AuthValue {
-  session: Session | null;
-  user: User | null;
+  session: DemoSession | null;
+  user: DemoUser | null;
   loading: boolean;
   signIn: (studentId: string, pin: string) => Promise<void>;
   signUp: (studentId: string, pin: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
+const STORAGE_KEY = 'campuskart-demo-session';
 const AuthContext = createContext<AuthValue | undefined>(undefined);
 
-/** Student IDs are mapped to a stable internal email so the kiosk can use the ID + PIN pair. */
-const emailFor = (studentId: string) => `${studentId.trim().toLowerCase()}@student.campuskart.app`;
+function readSession(): DemoSession | null {
+  try {
+    const value = localStorage.getItem(STORAGE_KEY);
+    return value ? JSON.parse(value) as DemoSession : null;
+  } catch {
+    return null;
+  }
+}
+
+function createDemoSession(studentId: string, fullName = 'CampusKart Student'): DemoSession {
+  const normalizedId = studentId.trim().toUpperCase();
+  return {
+    user: {
+      id: `demo-${normalizedId.toLowerCase()}`,
+      email: `${normalizedId.toLowerCase()}@demo.campuskart.local`,
+      user_metadata: { student_id: normalizedId, full_name: fullName.trim() || 'CampusKart Student', campus: 'Delhi' },
+    },
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<DemoSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const queryClient = useQueryClient();
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(next);
-      queryClient.invalidateQueries({ queryKey: ['profile'] });
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, [queryClient]);
+    setSession(readSession());
+    setLoading(false);
+  }, []);
 
   const signIn = async (studentId: string, pin: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: emailFor(studentId),
-      password: pin,
-    });
-    if (error) throw new Error('Student ID or PIN is incorrect.');
+    if (!studentId.trim() || !pin.trim()) throw new Error('Enter a demo Student ID and PIN.');
+    const next = createDemoSession(studentId);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setSession(next);
   };
 
   const signUp = async (studentId: string, pin: string, fullName: string) => {
-    const normalizedId = studentId.trim().toUpperCase();
-    const { data, error } = await supabase.auth.signUp({
-      email: emailFor(studentId),
-      password: pin,
-      options: {
-        data: { student_id: normalizedId, full_name: fullName.trim() || 'Student' },
-      },
-    });
-    if (error) {
-      throw new Error(
-        error.message.toLowerCase().includes('already')
-          ? 'That Student ID is already registered. Sign in instead.'
-          : error.message,
-      );
-    }
-    if (!data.session) throw new Error('Sign-up did not create a session. Please sign in with your Student ID and PIN.');
+    if (!studentId.trim() || !pin.trim()) throw new Error('Enter a demo Student ID and PIN.');
+    const next = createDemoSession(studentId, fullName);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setSession(next);
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem(STORAGE_KEY);
+    setSession(null);
   };
 
-  return (
-    <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, loading, signIn, signUp, signOut }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ session, user: session?.user ?? null, loading, signIn, signUp, signOut }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
@@ -93,14 +93,12 @@ export function useProfile() {
   return useQuery({
     queryKey: ['profile', user?.id],
     enabled: !!user,
-    queryFn: async (): Promise<Profile | null> => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, student_id, full_name, campus, wallet_balance')
-      .eq('id', user?.id ?? '')
-        .maybeSingle();
-      if (error) throw error;
-      return data as Profile | null;
-    },
+    queryFn: async (): Promise<Profile | null> => user ? ({
+      id: user.id,
+      student_id: user.user_metadata.student_id,
+      full_name: user.user_metadata.full_name,
+      campus: user.user_metadata.campus,
+      wallet_balance: 2500,
+    }) : null,
   });
 }
