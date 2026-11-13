@@ -1,359 +1,116 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  Shield,
-  DollarSign,
-  TrendingUp,
-  Calendar,
-  Bell,
-  Settings,
-  ChevronDown,
-  Check,
-  AlertCircle,
-  Minus,
-  Plus,
-} from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useMemo, useState } from 'react';
+import { ArrowDownToLine, Bell, Check, CircleDollarSign, Clock3, CreditCard, Minus, Plus, Shield, TrendingUp, Wallet, X } from 'lucide-react';
+import { toast } from 'sonner';
+import { Card, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Navbar } from '@/components/Navbar';
-import { useStore, categories } from '@/lib/store';
+import { categories, getSpentThisMonth, getSpentToday, useStore } from '@/lib/store';
 
-// Mock transaction data
-const mockTransactions = [
-  { id: '1', date: 'Today, 2:30 PM', items: ['Glucose Biscuits 100g', 'Mineral Water 1L'], amount: 30, category: 'Biscuits & Cookies' },
-  { id: '2', date: 'Today, 10:15 AM', items: ['Dairy Milk Classic 25g', 'Munch Bar'], amount: 35, category: 'Chocolates' },
-  { id: '3', date: 'Yesterday', items: ['Surf Excel Powder 500g', 'Tissue Pack 50pcs'], amount: 120, category: 'Hygiene & Home Care' },
-  { id: '4', date: 'Yesterday', items: ['Aloo Bhujia 200g', 'Navratan Mix 200g'], amount: 120, category: 'Snacks & Namkeen' },
-  { id: '5', date: '2 days ago', items: ['Fresh Coconut Water 300ml', 'Elaichi Rusk 300g'], amount: 100, category: 'Coconut Water' },
-];
-
-// Mock spend data for chart
-const weeklySpend = [
-  { day: 'Mon', amount: 120 },
-  { day: 'Tue', amount: 85 },
-  { day: 'Wed', amount: 200 },
-  { day: 'Thu', amount: 45 },
-  { day: 'Fri', amount: 150 },
-  { day: 'Sat', amount: 90 },
-  { day: 'Sun', amount: 60 },
-];
+const money = (value: number) => `₹${value.toLocaleString('en-IN')}`;
 
 export default function ParentDashboard() {
-  const { parentLimits, updateParentLimits } = useStore();
+  const { student, walletBalance, walletTransactions, addFunds, parentLimits, updateParentLimits, orders, approveOrder, rejectOrder } = useStore();
   const [dailyLimit, setDailyLimit] = useState(parentLimits.daily);
   const [monthlyLimit, setMonthlyLimit] = useState(parentLimits.monthly);
+  const [approvalAbove, setApprovalAbove] = useState(parentLimits.approvalAbove);
+  const [timeRestrictionEnabled, setTimeRestrictionEnabled] = useState(parentLimits.timeRestrictionEnabled);
+  const [allowedFrom, setAllowedFrom] = useState(parentLimits.allowedFrom);
+  const [allowedUntil, setAllowedUntil] = useState(parentLimits.allowedUntil);
   const [allowedCategories, setAllowedCategories] = useState(parentLimits.categories);
+  const [topUpAmount, setTopUpAmount] = useState('500');
+  const [settingsSaved, setSettingsSaved] = useState(true);
 
-  const spentToday = 125;
-  const spentThisMonth = 2450;
-  const maxWeeklySpend = Math.max(...weeklySpend.map((d) => d.amount));
+  const spentToday = getSpentToday(orders);
+  const spentThisMonth = getSpentThisMonth(orders);
+  const currentMonth = new Date();
+  const monthOrders = orders.filter((order) => order.status !== 'pending-approval' && order.status !== 'cancelled' && new Date(order.createdAt).getFullYear() === currentMonth.getFullYear() && new Date(order.createdAt).getMonth() === currentMonth.getMonth());
+  const pendingOrders = orders.filter((order) => order.status === 'pending-approval');
+  const recentActivity = useMemo(() => walletTransactions
+    .map((tx) => ({ id: tx.id, label: tx.description, amount: tx.amount, date: tx.createdAt, type: tx.type }))
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 8), [walletTransactions]);
 
-  const toggleCategory = (categoryName: string) => {
-    setAllowedCategories((prev) =>
-      prev.includes(categoryName)
-        ? prev.filter((c) => c !== categoryName)
-        : [...prev, categoryName]
-    );
+  const handleSave = () => {
+    updateParentLimits({ daily: dailyLimit, monthly: monthlyLimit, approvalAbove, categories: allowedCategories, timeRestrictionEnabled, allowedFrom, allowedUntil });
+    setSettingsSaved(true);
+    toast.success('Spending policy saved for the demo student.');
   };
 
-  const saveSettings = () => {
-    updateParentLimits({
-      daily: dailyLimit,
-      monthly: monthlyLimit,
-      categories: allowedCategories,
-    });
+  const handleTopUp = () => {
+    const amount = Number(topUpAmount);
+    if (!Number.isFinite(amount) || amount < 100 || amount > 10000) {
+      toast.error('Choose a top-up between ₹100 and ₹10,000.');
+      return;
+    }
+    addFunds(amount);
+    toast.success(`${money(amount)} added to the demo wallet.`);
+  };
+
+  const downloadStatement = () => {
+    const rows = [
+      ['Date', 'Description', 'Type', 'Amount (INR)'],
+      ...[...walletTransactions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((entry) => [new Date(entry.createdAt).toLocaleString('en-IN'), entry.description, entry.type, String(entry.amount)]),
+    ];
+    const csv = rows.map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'campuskart-parent-statement-demo.csv';
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast.success('Demo statement downloaded.');
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      <main className="container mx-auto max-w-7xl px-4 py-8">
+        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2"><Badge variant="verified">Parent Portal</Badge><Badge variant="secondary">Shared-device demo</Badge></div>
+            <h1 className="font-display text-3xl font-bold">Spending Control Center</h1>
+            <p className="mt-1 text-muted-foreground">Manage {student.fullName.split(' ')[0]}'s campus wallet, spending policy and orders.</p>
+            <p className="mt-1 text-sm text-muted-foreground">{student.fullName} · {student.studentId} · {student.institution}, {student.city} · Parent: {student.parentName}</p>
+          </div>
+          <Button variant="outline" onClick={downloadStatement}><ArrowDownToLine className="mr-2 h-4 w-4" /> Download statement</Button>
+        </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-10 h-10 rounded-xl gradient-trust flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-secondary-foreground" />
-                </div>
-                <Badge variant="verified">Parent Portal</Badge>
-                <Badge variant="secondary">Sample demo data</Badge>
+        <section className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="p-5"><div className="flex items-center justify-between text-sm text-muted-foreground"><span>Available wallet</span><Wallet className="h-4 w-4 text-primary" /></div><p className="mt-2 font-display text-3xl font-bold">{money(walletBalance)}</p><p className="mt-1 text-xs text-muted-foreground">Demo balance · no real payment</p></Card>
+          <Card className="p-5"><div className="flex items-center justify-between text-sm text-muted-foreground"><span>Spent today</span><CircleDollarSign className="h-4 w-4 text-primary" /></div><p className="mt-2 font-display text-3xl font-bold">{money(spentToday)}</p><p className="mt-1 text-xs text-muted-foreground">of {money(dailyLimit)} daily limit</p><div className="mt-3 h-2 rounded-full bg-muted"><div className="h-2 rounded-full bg-primary" style={{ width: `${Math.min(100, dailyLimit ? spentToday / dailyLimit * 100 : 0)}%` }} /></div></Card>
+          <Card className="p-5"><div className="flex items-center justify-between text-sm text-muted-foreground"><span>Spent this month</span><TrendingUp className="h-4 w-4 text-secondary" /></div><p className="mt-2 font-display text-3xl font-bold">{money(spentThisMonth)}</p><p className="mt-1 text-xs text-muted-foreground">of {money(monthlyLimit)} monthly limit</p><div className="mt-3 h-2 rounded-full bg-muted"><div className="h-2 rounded-full bg-secondary" style={{ width: `${Math.min(100, monthlyLimit ? spentThisMonth / monthlyLimit * 100 : 0)}%` }} /></div></Card>
+          <Card className="p-5"><div className="flex items-center justify-between text-sm text-muted-foreground"><span>Orders this month</span><CreditCard className="h-4 w-4 text-accent" /></div><p className="mt-2 font-display text-3xl font-bold">{monthOrders.length}</p><p className="mt-1 text-xs text-muted-foreground">Visible from the student demo flow</p></Card>
+        </section>
+
+        {pendingOrders.length > 0 && <Card className="mb-6 border-amber-300 bg-amber-50/60 p-5 dark:bg-amber-950/20"><div className="mb-4 flex items-center gap-2"><Bell className="h-5 w-5 text-amber-600" /><h2 className="font-display text-lg font-semibold">Orders awaiting your approval</h2><Badge variant="secondary">{pendingOrders.length} pending</Badge></div><div className="space-y-3">{pendingOrders.map((order) => <div key={order.id} className="flex flex-col justify-between gap-3 rounded-xl border border-amber-200 bg-background p-4 sm:flex-row sm:items-center"><div><p className="font-semibold">{order.id} · {money(order.total)}</p><p className="text-sm text-muted-foreground">{order.items.map((item) => `${item.product.name} × ${item.quantity}`).join(', ')}</p><p className="mt-1 text-xs text-muted-foreground">{order.deliverySlot} · {order.hostel}</p></div><div className="flex gap-2"><Button size="sm" onClick={() => { const ok = approveOrder(order.id); ok ? toast.success('Order approved and wallet debited.') : toast.error('Insufficient wallet balance. Add funds first.'); }}><Check className="mr-1 h-4 w-4" /> Approve</Button><Button size="sm" variant="outline" onClick={() => { rejectOrder(order.id); toast.success('Order request declined.'); }}><X className="mr-1 h-4 w-4" /> Decline</Button></div></div>)}</div></Card>}
+
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <Card className="p-6">
+              <div className="mb-5 flex items-center justify-between"><div><CardTitle>Fund student wallet</CardTitle><p className="mt-1 text-sm text-muted-foreground">Simulate a parent top-up for this presentation.</p></div><Wallet className="h-5 w-5 text-primary" /></div>
+              <div className="flex flex-wrap gap-2">{[250, 500, 1000].map((amount) => <Button key={amount} variant={topUpAmount === String(amount) ? 'default' : 'outline'} onClick={() => setTopUpAmount(String(amount))}>₹{amount}</Button>)}</div>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row"><input className="h-11 min-w-0 flex-1 rounded-xl border border-input bg-background px-3 text-sm" inputMode="numeric" value={topUpAmount} onChange={(event) => setTopUpAmount(event.target.value.replace(/\D/g, ''))} aria-label="Top-up amount" /><Button onClick={handleTopUp}>Add demo funds</Button></div>
+              <p className="mt-3 text-xs text-muted-foreground">This only changes the browser's demo wallet. It does not initiate a payment.</p>
+            </Card>
+
+            <Card className="p-6">
+              <div className="mb-5 flex items-center justify-between"><div><CardTitle>Spending controls</CardTitle><p className="mt-1 text-sm text-muted-foreground">Set the boundaries for student purchases.</p></div><Shield className="h-5 w-5 text-primary" /></div>
+              <div className="space-y-5">
+                {[{ label: 'Daily spending limit', value: dailyLimit, set: setDailyLimit, step: 50, min: 100, max: 2000 }, { label: 'Monthly spending limit', value: monthlyLimit, set: setMonthlyLimit, step: 500, min: 1000, max: 20000 }, { label: 'Parent approval above', value: approvalAbove, set: setApprovalAbove, step: 50, min: 100, max: 5000 }].map((limit) => <div key={limit.label}><div className="mb-2 flex items-center justify-between"><span className="text-sm font-medium">{limit.label}</span><strong>{money(limit.value)}</strong></div><div className="flex items-center gap-3"><Button variant="outline" size="icon-sm" onClick={() => { limit.set(Math.max(limit.min, limit.value - limit.step)); setSettingsSaved(false); }}><Minus className="h-4 w-4" /></Button><div className="h-2 flex-1 rounded-full bg-muted"><div className="h-2 rounded-full bg-primary" style={{ width: `${Math.min(100, limit.value / limit.max * 100)}%` }} /></div><Button variant="outline" size="icon-sm" onClick={() => { limit.set(Math.min(limit.max, limit.value + limit.step)); setSettingsSaved(false); }}><Plus className="h-4 w-4" /></Button></div></div>)}
               </div>
-              <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-                Spending Control Center
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Monitor and manage your child's campus spending
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Bell className="w-4 h-4" />
-                Notifications
-              </Button>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Settings className="w-4 h-4" />
-                Settings
-              </Button>
-            </div>
+              <div className="mt-6 border-t border-border pt-5"><div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-semibold">Allowed purchase hours</h3><p className="mt-1 text-xs text-muted-foreground">Orders outside this window are sent for parent approval.</p></div><button type="button" role="switch" aria-checked={timeRestrictionEnabled} onClick={() => { setTimeRestrictionEnabled((value) => !value); setSettingsSaved(false); }} className={`relative h-7 w-12 rounded-full transition ${timeRestrictionEnabled ? 'bg-primary' : 'bg-muted'}`}><span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${timeRestrictionEnabled ? 'left-6' : 'left-1'}`} /></button></div>{timeRestrictionEnabled && <div className="mt-3 grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">Allowed from<input type="time" value={allowedFrom} onChange={(event) => { setAllowedFrom(event.target.value); setSettingsSaved(false); }} className="mt-1 h-11 w-full rounded-xl border border-input bg-background px-3" /></label><label className="text-sm font-medium">Allowed until<input type="time" value={allowedUntil} onChange={(event) => { setAllowedUntil(event.target.value); setSettingsSaved(false); }} className="mt-1 h-11 w-full rounded-xl border border-input bg-background px-3" /></label></div>}</div><div className="mt-6 border-t border-border pt-5"><h3 className="mb-1 font-semibold">Allowed product categories</h3><p className="mb-3 text-xs text-muted-foreground">Disabled categories are blocked at student checkout.</p><div className="grid gap-2 sm:grid-cols-2">{categories.map((category) => { const active = allowedCategories.includes(category.name); return <button key={category.id} type="button" onClick={() => { setAllowedCategories((previous) => active ? previous.filter((name) => name !== category.name) : [...previous, category.name]); setSettingsSaved(false); }} className={`flex items-center justify-between rounded-xl border px-3 py-2 text-left text-sm ${active ? 'border-primary/30 bg-primary/5' : 'border-border bg-muted/40 text-muted-foreground'}`}><span>{category.icon} {category.name}</span><span className={`flex h-5 w-5 items-center justify-center rounded-full ${active ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>{active && <Check className="h-3 w-3" />}</span></button>; })}</div></div>
+              <Button className="mt-5 w-full" onClick={handleSave}>{settingsSaved ? 'Save spending policy' : 'Save changes'}</Button>
+            </Card>
           </div>
 
-          {/* Stats Overview */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {[
-              {
-                label: 'Spent Today',
-                value: `₹${spentToday}`,
-                limit: `of ₹${dailyLimit}`,
-                percent: (spentToday / dailyLimit) * 100,
-                icon: DollarSign,
-                color: 'text-primary',
-              },
-              {
-                label: 'This Month',
-                value: `₹${spentThisMonth}`,
-                limit: `of ₹${monthlyLimit}`,
-                percent: (spentThisMonth / monthlyLimit) * 100,
-                icon: Calendar,
-                color: 'text-secondary',
-              },
-              {
-                label: 'Total Orders',
-                value: '24',
-                limit: 'this month',
-                percent: null,
-                icon: TrendingUp,
-                color: 'text-accent',
-              },
-              {
-                label: 'Healthy Items',
-                value: '68%',
-                limit: 'of orders',
-                percent: 68,
-                icon: Check,
-                color: 'text-primary',
-              },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="text-sm text-muted-foreground">{stat.label}</span>
-                    <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                  </div>
-                  <div className="font-display text-2xl font-bold text-foreground">
-                    {stat.value}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">{stat.limit}</div>
-                  {stat.percent !== null && (
-                    <div className="mt-3 h-1.5 bg-muted rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(stat.percent, 100)}%` }}
-                        transition={{ delay: 0.5, duration: 0.5 }}
-                        className={`h-full rounded-full ${
-                          stat.percent > 80 ? 'bg-destructive' : 'bg-primary'
-                        }`}
-                      />
-                    </div>
-                  )}
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Spending Chart */}
-            <div className="lg:col-span-2">
-              <Card className="p-6">
-                <CardTitle className="mb-6">Weekly Spending</CardTitle>
-                <div className="h-48 flex items-end justify-between gap-2">
-                  {weeklySpend.map((day, index) => (
-                    <motion.div
-                      key={day.day}
-                      className="flex-1 flex flex-col items-center gap-2"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <div className="w-full relative h-36 flex items-end">
-                        <motion.div
-                          initial={{ height: 0 }}
-                          animate={{ height: `${(day.amount / maxWeeklySpend) * 100}%` }}
-                          transition={{ delay: 0.3 + index * 0.05, duration: 0.4 }}
-                          className="w-full bg-primary/20 rounded-t-lg relative group cursor-pointer hover:bg-primary/30 transition-colors"
-                        >
-                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Badge variant="secondary" className="text-xs whitespace-nowrap">
-                              ₹{day.amount}
-                            </Badge>
-                          </div>
-                        </motion.div>
-                      </div>
-                      <span className="text-xs text-muted-foreground font-medium">{day.day}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Recent Transactions */}
-              <Card className="p-6 mt-6">
-                <CardTitle className="mb-4">Recent Transactions</CardTitle>
-                <div className="space-y-4">
-                  {mockTransactions.map((tx, index) => (
-                    <motion.div
-                      key={tx.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex items-center justify-between py-3 border-b border-border last:border-0"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                          <span className="text-lg">
-                            {categories.find((c) => c.name === tx.category)?.icon || '📦'}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground text-sm">
-                            {tx.items.join(', ')}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{tx.date}</p>
-                        </div>
-                      </div>
-                      <span className="font-display font-semibold text-foreground">
-                        ₹{tx.amount}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              </Card>
-            </div>
-
-            {/* Controls */}
-            <div className="space-y-6">
-              {/* Spending Limits */}
-              <Card className="p-6">
-                <CardTitle className="mb-6">Spending Limits</CardTitle>
-                <div className="space-y-6">
-                  {/* Daily Limit */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-foreground">Daily Limit</span>
-                      <span className="font-display font-bold text-lg">₹{dailyLimit}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        onClick={() => setDailyLimit(Math.max(100, dailyLimit - 50))}
-                      >
-                        <Minus className="w-4 h-4" />
-                      </Button>
-                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary rounded-full transition-all"
-                          style={{ width: `${(dailyLimit / 1000) * 100}%` }}
-                        />
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        onClick={() => setDailyLimit(Math.min(1000, dailyLimit + 50))}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Monthly Limit */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-foreground">Monthly Limit</span>
-                      <span className="font-display font-bold text-lg">₹{monthlyLimit}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        onClick={() => setMonthlyLimit(Math.max(1000, monthlyLimit - 500))}
-                      >
-                        <Minus className="w-4 h-4" />
-                      </Button>
-                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-secondary rounded-full transition-all"
-                          style={{ width: `${(monthlyLimit / 10000) * 100}%` }}
-                        />
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        onClick={() => setMonthlyLimit(Math.min(10000, monthlyLimit + 500))}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Category Permissions */}
-              <Card className="p-6">
-                <CardTitle className="mb-4">Category Permissions</CardTitle>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Select which categories your child can order from
-                </p>
-                <div className="space-y-2">
-                  {categories.map((category) => {
-                    const isAllowed = allowedCategories.includes(category.name);
-                    return (
-                      <button
-                        key={category.id}
-                        onClick={() => toggleCategory(category.name)}
-                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
-                          isAllowed
-                            ? 'bg-primary/10 border border-primary/20'
-                            : 'bg-muted/50 border border-transparent'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg">{category.icon}</span>
-                          <span
-                            className={`text-sm font-medium ${
-                              isAllowed ? 'text-foreground' : 'text-muted-foreground'
-                            }`}
-                          >
-                            {category.name}
-                          </span>
-                        </div>
-                        <div
-                          className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                            isAllowed ? 'bg-primary' : 'bg-muted'
-                          }`}
-                        >
-                          {isAllowed && <Check className="w-3 h-3 text-primary-foreground" />}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Card>
-
-              {/* Save Button */}
-              <Button variant="hero" size="lg" className="w-full" onClick={saveSettings}>
-                Save Settings
-              </Button>
-            </div>
+          <div className="space-y-6">
+            <Card className="p-6"><CardTitle className="mb-4">Recent activity</CardTitle>{recentActivity.length === 0 ? <div className="rounded-xl bg-muted/50 p-6 text-center"><Clock3 className="mx-auto mb-2 h-7 w-7 text-muted-foreground" /><p className="font-medium">No activity yet</p><p className="mt-1 text-sm text-muted-foreground">Place an order in the student storefront to see it appear here.</p></div> : <div className="space-y-3">{recentActivity.map((entry) => <div key={entry.id} className="flex items-start justify-between gap-3 border-b border-border pb-3 last:border-0"><div className="min-w-0"><p className="truncate text-sm font-medium">{entry.label}</p><p className="text-xs text-muted-foreground">{new Date(entry.date).toLocaleString('en-IN')}</p></div><span className={`shrink-0 text-sm font-semibold ${entry.amount > 0 ? 'text-primary' : 'text-foreground'}`}>{entry.amount > 0 ? '+' : ''}{money(entry.amount)}</span></div>)}</div>}</Card>
+            <Card className="p-6"><CardTitle className="mb-4">Student & campus</CardTitle><div className="space-y-3 text-sm"><div className="flex justify-between gap-3"><span className="text-muted-foreground">Student</span><strong>{student.fullName}</strong></div><div className="flex justify-between gap-3"><span className="text-muted-foreground">Student ID</span><strong>{student.studentId}</strong></div><div className="flex justify-between gap-3"><span className="text-muted-foreground">College / campus</span><strong className="text-right">{student.institution}</strong></div><div className="flex justify-between gap-3"><span className="text-muted-foreground">Hostel / pickup</span><strong>{student.hostel}</strong></div><div className="flex justify-between gap-3"><span className="text-muted-foreground">Campus city</span><strong>{student.city}</strong></div></div></Card>
+            <Card className="p-6"><CardTitle className="mb-3">Planned funding architecture</CardTitle><p className="mb-4 text-sm text-muted-foreground">The production payment rail is designed around a regulated payment partner and a ledger-backed student wallet. The steps below are explanatory only; this prototype does not process money.</p><div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-4"><div className="rounded-xl bg-muted p-3"><strong className="block">Parent</strong><span className="text-muted-foreground">Initiates funding</span></div><div className="rounded-xl bg-muted p-3"><strong className="block">Payment partner</strong><span className="text-muted-foreground">Verifies payment</span></div><div className="rounded-xl bg-muted p-3"><strong className="block">Settlement</strong><span className="text-muted-foreground">Regulated rail</span></div><div className="rounded-xl bg-primary/10 p-3"><strong className="block">CampusKart ledger</strong><span className="text-muted-foreground">Credits wallet</span></div></div><p className="mt-3 text-xs text-muted-foreground">CampusKart's production ledger should be double-entry and server-authoritative; the browser demo balance is illustrative.</p></Card><Card className="p-6"><CardTitle className="mb-3">Parent assurance</CardTitle><div className="space-y-2 text-sm text-muted-foreground"><p className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-primary" /> Spending rules are visible before checkout.</p><p className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-primary" /> Orders above your approval threshold wait for review.</p><p className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-primary" /> Every demo top-up and purchase appears in activity.</p><p className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-primary" /> Purchase-hour rules can route out-of-window orders for approval.</p></div><p className="mt-3 text-xs text-muted-foreground">Interactive prototype · shared browser state only.</p></Card>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

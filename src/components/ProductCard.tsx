@@ -11,7 +11,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
-  const { cart, addToCart, updateQuantity } = useStore();
+  const { cart, addToCart, updateQuantity, parentLimits } = useStore();
   const cartItem = cart.find((item) => item.product.id === product.id);
   const quantity = cartItem?.quantity || 0;
 
@@ -22,6 +22,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   };
 
   const isOutOfStock = product.availability === 'out-of-stock';
+  const isParentRestricted = !parentLimits.categories.includes(product.category);
 
   return (
     <motion.div
@@ -61,6 +62,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {product.tags.includes('emergency') && (
               <Badge variant="emergency">Emergency</Badge>
             )}
+            {isParentRestricted && <Badge variant="destructive">Parent restricted</Badge>}
           </div>
         </div>
 
@@ -85,10 +87,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                     variant="add"
                     size="sm"
                     onClick={() => addToCart(product)}
+                    disabled={isParentRestricted}
                     className="gap-1.5"
                   >
                     <Plus className="w-4 h-4" />
-                    Add
+                    {isParentRestricted ? 'Restricted' : 'Add'}
                   </Button>
                 ) : (
                   <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
@@ -107,6 +110,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                       variant="ghost"
                       size="icon-sm"
                       onClick={() => updateQuantity(product.id, quantity + 1)}
+                      disabled={isParentRestricted}
                       className="h-7 w-7"
                     >
                       <Plus className="w-4 h-4" />

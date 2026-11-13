@@ -139,7 +139,7 @@ export default function Products() {
               {categoryParam || 'All Products'}
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              {filteredProducts.length} items available
+              {filteredProducts.length} demo items · {mockProducts.length} sample products in this prototype
             </p>
           </div>
           {categoryParam && (

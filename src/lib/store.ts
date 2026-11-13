@@ -18,37 +18,65 @@ export interface CartItem {
   quantity: number;
 }
 
+export type OrderStatus = 'pending-approval' | 'placed' | 'packed' | 'on-the-way' | 'collected' | 'cancelled';
+
 export interface Order {
   id: string;
   items: CartItem[];
   total: number;
-  status: 'placed' | 'packed' | 'on-the-way' | 'collected';
-  createdAt: Date;
+  status: OrderStatus;
+  createdAt: string;
   estimatedDelivery: string;
   deliverySlot?: string;
+  studentName: string;
+  studentId: string;
+  city: string;
+  institution: string;
+  hostel: string;
+  paymentMethod: 'wallet' | 'pay-at-pickup';
+  paymentStatus: 'paid' | 'pending';
+  pickupCode: string;
+  note?: string;
 }
 
-interface User {
+export interface StudentProfile {
+  fullName: string;
+  studentId: string;
+  city: string;
+  institution: string;
+  hostel: string;
+  parentName: string;
+  parentContact: string;
+}
+
+export interface WalletTransaction {
   id: string;
-  name: string;
-  role: 'student' | 'parent';
-  campus: string;
-  dailyLimit: number;
-  monthlyLimit: number;
-  spentToday: number;
-  spentThisMonth: number;
+  type: 'top-up' | 'purchase' | 'refund';
+  amount: number;
+  description: string;
+  createdAt: string;
+  orderId?: string;
+}
+
+interface ParentLimits {
+  daily: number;
+  monthly: number;
+  categories: string[];
+  approvalAbove: number;
+  timeRestrictionEnabled: boolean;
+  allowedFrom: string;
+  allowedUntil: string;
 }
 
 interface AppState {
-  // User
-  user: User | null;
-  setUser: (user: User | null) => void;
-  
-  // Campus
+  student: StudentProfile;
+  updateStudent: (profile: Partial<StudentProfile>) => void;
   selectedCampus: string;
-  setSelectedCampus: (campus: string) => void;
-  
-  // Cart
+  setSelectedCampus: (city: string) => void;
+  selectedInstitution: string;
+  setSelectedInstitution: (institution: string) => void;
+  selectedHostel: string;
+  setSelectedHostel: (hostel: string) => void;
   cart: CartItem[];
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
@@ -56,121 +84,161 @@ interface AppState {
   clearCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
-  
-  // Orders
   orders: Order[];
   addOrder: (order: Order) => void;
-  updateOrderStatus: (orderId: string, status: Order['status']) => void;
-  
-  // Parent Controls
-  parentLimits: {
-    daily: number;
-    monthly: number;
-    categories: string[];
-  };
-  updateParentLimits: (limits: Partial<AppState['parentLimits']>) => void;
+  approveOrder: (orderId: string) => boolean;
+  rejectOrder: (orderId: string) => void;
+  updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+  walletBalance: number;
+  walletTransactions: WalletTransaction[];
+  addFunds: (amount: number) => void;
+  parentLimits: ParentLimits;
+  updateParentLimits: (limits: Partial<ParentLimits>) => void;
+  resetDemo: () => void;
 }
+
+const CITY_NAMES = [
+  'Delhi', 'Mumbai', 'Bengaluru', 'Hyderabad', 'Ahmedabad',
+  'Chennai', 'Kolkata', 'Pune', 'Surat', 'Jaipur',
+];
+
+const defaultStudent: StudentProfile = {
+  fullName: 'Aarav Mehta',
+  studentId: 'CK2026001',
+  city: 'Hyderabad',
+  institution: 'Hyderabad Campus Partner',
+  hostel: 'B-Block Hostel',
+  parentName: 'Rajesh Mehta',
+  parentContact: '+91 98XXXXXX24',
+};
+
+const defaultLimits: ParentLimits = {
+  daily: 500,
+  monthly: 5000,
+  approvalAbove: 400,
+  timeRestrictionEnabled: true,
+  allowedFrom: '06:00',
+  allowedUntil: '23:00',
+  categories: ['Fruits & Fresh', 'Biscuits & Cookies', 'Snacks & Namkeen', 'Chocolates', 'Candies & Treats', 'Bakery & Rusks', 'Pickles & Add-ons', 'Beverages', 'Coconut Water', 'Hygiene & Home Care', 'Emergency', 'Stationery'],
+};
+
+const makeWalletTransaction = (type: WalletTransaction['type'], amount: number, description: string, orderId?: string): WalletTransaction => ({
+  id: `WT-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  type,
+  amount,
+  description,
+  createdAt: new Date().toISOString(),
+  orderId,
+});
+
+const calculateSpent = (orders: Order[], period: 'today' | 'month') => {
+  const now = new Date();
+  return orders.filter((order) => {
+    if (order.status === 'pending-approval' || order.status === 'cancelled') return false;
+    const created = new Date(order.createdAt);
+    if (Number.isNaN(created.getTime())) return false;
+    return period === 'today'
+      ? created.toDateString() === now.toDateString()
+      : created.getFullYear() === now.getFullYear() && created.getMonth() === now.getMonth();
+  }).reduce((sum, order) => sum + order.total, 0);
+};
 
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
-      // User
-      user: null,
-      setUser: (user) => set({ user }),
-      
-      // Campus
-      selectedCampus: 'Delhi',
-      setSelectedCampus: (campus) => set({ selectedCampus: campus }),
-      
-      // Cart
+      student: defaultStudent,
+      updateStudent: (profile) => set((state) => {
+        const next = { ...state.student, ...profile };
+        return {
+          student: next,
+          selectedCampus: next.city,
+          selectedInstitution: next.institution,
+          selectedHostel: next.hostel,
+        };
+      }),
+      selectedCampus: defaultStudent.city,
+      setSelectedCampus: (city) => set((state) => ({ selectedCampus: city, student: { ...state.student, city } })),
+      selectedInstitution: defaultStudent.institution,
+      setSelectedInstitution: (institution) => set((state) => ({ selectedInstitution: institution, student: { ...state.student, institution } })),
+      selectedHostel: defaultStudent.hostel,
+      setSelectedHostel: (hostel) => set((state) => ({ selectedHostel: hostel, student: { ...state.student, hostel } })),
       cart: [],
-      addToCart: (product) => {
-        const { cart } = get();
-        const existing = cart.find((item) => item.product.id === product.id);
-        if (existing) {
-          set({
-            cart: cart.map((item) =>
-              item.product.id === product.id
-                ? { ...item, quantity: item.quantity + 1 }
-                : item
-            ),
-          });
-        } else {
-          set({ cart: [...cart, { product, quantity: 1 }] });
-        }
-      },
-      removeFromCart: (productId) => {
-        set({ cart: get().cart.filter((item) => item.product.id !== productId) });
-      },
-      updateQuantity: (productId, quantity) => {
-        if (quantity <= 0) {
-          get().removeFromCart(productId);
-        } else {
-          set({
-            cart: get().cart.map((item) =>
-              item.product.id === productId ? { ...item, quantity } : item
-            ),
-          });
-        }
-      },
+      addToCart: (product) => set((state) => {
+        const existing = state.cart.find((item) => item.product.id === product.id);
+        if (existing) return { cart: state.cart.map((item) => item.product.id === product.id ? { ...item, quantity: Math.min(item.quantity + 1, 20) } : item) };
+        return { cart: [...state.cart, { product, quantity: 1 }] };
+      }),
+      removeFromCart: (productId) => set((state) => ({ cart: state.cart.filter((item) => item.product.id !== productId) })),
+      updateQuantity: (productId, quantity) => set((state) => ({ cart: quantity <= 0 ? state.cart.filter((item) => item.product.id !== productId) : state.cart.map((item) => item.product.id === productId ? { ...item, quantity: Math.min(quantity, 20) } : item) })),
       clearCart: () => set({ cart: [] }),
-      getCartTotal: () => {
-        return get().cart.reduce(
-          (total, item) => total + item.product.price * item.quantity,
-          0
-        );
-      },
-      getCartCount: () => {
-        return get().cart.reduce((count, item) => count + item.quantity, 0);
-      },
-      
-      // Orders
+      getCartTotal: () => get().cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+      getCartCount: () => get().cart.reduce((sum, item) => sum + item.quantity, 0),
       orders: [],
-      addOrder: (order) => set({ orders: [order, ...get().orders] }),
-      updateOrderStatus: (orderId, status) => {
+      addOrder: (order) => set((state) => {
+        const needsPayment = order.status !== 'pending-approval' && order.paymentMethod === 'wallet';
+        return {
+          orders: [order, ...state.orders],
+          walletBalance: needsPayment ? state.walletBalance - order.total : state.walletBalance,
+          walletTransactions: needsPayment ? [makeWalletTransaction('purchase', -order.total, `CampusKart order ${order.id}`, order.id), ...state.walletTransactions] : state.walletTransactions,
+        };
+      }),
+      approveOrder: (orderId) => {
+        const state = get();
+        const order = state.orders.find((entry) => entry.id === orderId);
+        if (!order || order.status !== 'pending-approval' || state.walletBalance < order.total) return false;
         set({
-          orders: get().orders.map((order) =>
-            order.id === orderId ? { ...order, status } : order
-          ),
+          walletBalance: state.walletBalance - order.total,
+          walletTransactions: [makeWalletTransaction('purchase', -order.total, `Parent-approved order ${order.id}`, order.id), ...state.walletTransactions],
+          orders: state.orders.map((entry) => entry.id === orderId ? { ...entry, status: 'placed', paymentStatus: 'paid' } : entry),
         });
+        return true;
       },
-      
-      // Parent Controls
-      parentLimits: {
-        daily: 500,
-        monthly: 5000,
-        categories: ['Fruits & Fresh', 'Snacks', 'Beverages', 'Coconut Water', 'Hygiene', 'Emergency', 'Stationery'],
-      },
-      updateParentLimits: (limits) =>
-        set({ parentLimits: { ...get().parentLimits, ...limits } }),
+      rejectOrder: (orderId) => set((state) => ({ orders: state.orders.map((order) => order.id === orderId ? { ...order, status: 'cancelled' } : order) })),
+      updateOrderStatus: (orderId, status) => set((state) => ({ orders: state.orders.map((order) => order.id === orderId ? { ...order, status } : order) })),
+      walletBalance: 2500,
+      walletTransactions: [makeWalletTransaction('top-up', 2500, 'Opening demo wallet allocation')],
+      addFunds: (amount) => set((state) => ({ walletBalance: state.walletBalance + amount, walletTransactions: [makeWalletTransaction('top-up', amount, 'Parent wallet top-up'), ...state.walletTransactions] })),
+      parentLimits: defaultLimits,
+      updateParentLimits: (limits) => set((state) => ({ parentLimits: { ...state.parentLimits, ...limits } })),
+      resetDemo: () => set({ student: defaultStudent, selectedCampus: defaultStudent.city, selectedInstitution: defaultStudent.institution, selectedHostel: defaultStudent.hostel, cart: [], orders: [], walletBalance: 2500, walletTransactions: [makeWalletTransaction('top-up', 2500, 'Opening demo wallet allocation')], parentLimits: defaultLimits }),
     }),
     {
       name: 'campuskart-storage',
-      version: 2,
+      version: 4,
       migrate: (persistedState: any) => {
         const legacyCityNames: Record<string, string> = {
-          'IIT Delhi': 'Delhi',
-          'IIT Bombay': 'Mumbai',
-          'IIT Madras': 'Chennai',
-          'IIT Kanpur': 'Kanpur',
-          'BITS Pilani': 'Jaipur',
-          'NIT Trichy': 'Chennai',
-          'IIIT Hyderabad': 'Hyderabad',
-          'DTU Delhi': 'Delhi',
-          'NSIT Delhi': 'Delhi',
-          'VIT Vellore': 'Vellore',
+          'IIT Delhi': 'Delhi', 'IIT Bombay': 'Mumbai', 'IIT Madras': 'Chennai', 'IIT Kanpur': 'Kanpur',
+          'BITS Pilani': 'Jaipur', 'NIT Trichy': 'Chennai', 'IIIT Hyderabad': 'Hyderabad', 'DTU Delhi': 'Delhi',
+          'NSIT Delhi': 'Delhi', 'VIT Vellore': 'Vellore',
         };
-        const previousSelection = persistedState?.selectedCampus;
-        return {
-          ...persistedState,
-          selectedCampus: legacyCityNames[previousSelection] ?? (
-            cities.includes(previousSelection) ? previousSelection : 'Delhi'
-          ),
-        };
+        const oldCity = persistedState?.selectedCampus;
+        const city = legacyCityNames[oldCity] ?? (CITY_NAMES.includes(oldCity) ? oldCity : defaultStudent.city);
+        const student = { ...defaultStudent, ...(persistedState?.student ?? {}), city };
+        const oldOrders = Array.isArray(persistedState?.orders) ? persistedState.orders : [];
+        const existingTransactions = Array.isArray(persistedState?.walletTransactions) ? persistedState.walletTransactions : [];
+        const migratedBalance = persistedState?.walletBalance ?? 2500;
+        const migratedTransactions = existingTransactions.length > 0 ? existingTransactions : migratedBalance > 0 ? [makeWalletTransaction('top-up', migratedBalance, 'Opening demo wallet allocation')] : [];
+        const migratedOrders = oldOrders.map((order: any) => ({
+          ...order,
+          createdAt: typeof order.createdAt === 'string' ? order.createdAt : new Date(order.createdAt ?? Date.now()).toISOString(),
+          studentName: order.studentName ?? student.fullName,
+          studentId: order.studentId ?? student.studentId,
+          city: order.city ?? city,
+          institution: order.institution ?? persistedState?.selectedInstitution ?? defaultStudent.institution,
+          hostel: order.hostel ?? persistedState?.selectedHostel ?? defaultStudent.hostel,
+          paymentMethod: order.paymentMethod ?? 'wallet',
+          paymentStatus: order.paymentStatus ?? 'paid',
+          pickupCode: order.pickupCode ?? '123456',
+          status: order.status ?? 'placed',
+        }));
+        return { ...persistedState, student, orders: migratedOrders, selectedCampus: city, selectedInstitution: persistedState?.selectedInstitution ?? student.institution, selectedHostel: persistedState?.selectedHostel ?? student.hostel, walletBalance: migratedBalance, walletTransactions: migratedTransactions, parentLimits: { ...defaultLimits, ...(persistedState?.parentLimits ?? {}) } };
       },
     }
   )
 );
+
+export const getSpentToday = (orders: Order[]) => calculateSpent(orders, 'today');
+export const getSpentThisMonth = (orders: Order[]) => calculateSpent(orders, 'month');
 
 // Mock Products Data
 export const mockProducts: Product[] = [
@@ -313,15 +381,4 @@ export const categories = [
   { id: 'stationery', name: 'Stationery', icon: '📝', color: 'bg-cyan-100' },
 ];
 
-export const cities = [
-  'Delhi',
-  'Mumbai',
-  'Bengaluru',
-  'Hyderabad',
-  'Ahmedabad',
-  'Chennai',
-  'Kolkata',
-  'Pune',
-  'Surat',
-  'Jaipur',
-];
+export const cities = CITY_NAMES;

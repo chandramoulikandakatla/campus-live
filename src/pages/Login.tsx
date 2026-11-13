@@ -5,12 +5,14 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth';
+import { useStore } from '@/lib/store';
 
 export default function Login() {
   const { signIn, signUp, session } = useAuth();
+  const updateStudent = useStore((state) => state.updateStudent);
   const navigate = useNavigate();
   const location = useLocation();
-  const destination = (location.state as { from?: string } | null)?.from || '/home';
+  const destination = (location.state as { from?: string } | null)?.from || '/';
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
   const [studentId, setStudentId] = useState('');
   const [pin, setPin] = useState('');
@@ -30,6 +32,7 @@ export default function Login() {
     try {
       if (mode === 'sign-up') await signUp(cleanId, pin, fullName);
       else await signIn(cleanId, pin);
+      updateStudent({ studentId: cleanId.toUpperCase(), ...(mode === 'sign-up' ? { fullName: fullName.trim() } : {}) });
       navigate(destination, { replace: true });
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'We couldn’t complete sign-in. Please try again.';
@@ -45,7 +48,7 @@ export default function Login() {
       <div className="mx-auto w-full max-w-6xl">
         <Link to="/" className="inline-flex min-h-12 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Back to CampusKart</Link>
         <div className="mx-auto grid max-w-4xl gap-12 py-12 md:grid-cols-[0.9fr_1.1fr] md:py-24">
-          <section className="flex flex-col justify-center"><span className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"><ShieldCheck className="h-6 w-6" /></span><h1 className="font-display text-4xl font-semibold">Your campus,<br />within reach.</h1><p className="mt-4 max-w-sm leading-relaxed text-muted-foreground">Sign in with your Student ID and six-digit PIN to continue to your campus shop.</p></section>
+          <section className="flex flex-col justify-center"><span className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"><ShieldCheck className="h-6 w-6" /></span><h1 className="font-display text-4xl font-semibold">Your campus,<br />within reach.</h1><p className="mt-4 max-w-sm leading-relaxed text-muted-foreground">Create a local demo profile with a Student ID and six-digit PIN to explore the student journey. This presentation flow does not verify identity.</p></section>
           <section className="border-t border-border pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
             <div className="mb-7 flex border-b border-border"><button type="button" onClick={() => { setMode('sign-in'); setError(''); }} className={`min-h-12 border-b-2 px-4 text-sm font-medium ${mode === 'sign-in' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground'}`}>Sign in</button><button type="button" onClick={() => { setMode('sign-up'); setError(''); }} className={`min-h-12 border-b-2 px-4 text-sm font-medium ${mode === 'sign-up' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground'}`}>Create account</button></div>
             <form onSubmit={submit} className="space-y-5">
@@ -54,7 +57,7 @@ export default function Login() {
               <label className="block space-y-2 text-sm font-medium">6-digit PIN<Input inputMode="numeric" autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'} type="password" maxLength={6} pattern="[0-9]{6}" value={pin} onChange={(event) => setPin(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="••••••" required /></label>
               {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
               <Button className="w-full" size="lg" type="submit" disabled={busy}>{busy ? 'Please wait…' : mode === 'sign-up' ? 'Create account' : 'Sign in'} <ArrowRight /></Button>
-              <p className="text-center text-xs leading-relaxed text-muted-foreground">Your account is for student access. Sign-up is ready immediately after creation.</p>
+              <p className="text-center text-xs leading-relaxed text-muted-foreground">Demo-only sign-in. No real student identity or college enrollment is verified.</p>
             </form>
           </section>
         </div>

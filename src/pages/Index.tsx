@@ -14,8 +14,8 @@ import { mockProducts, useStore } from '@/lib/store';
 const trustFeatures = [
   {
     icon: Shield,
-    title: 'Campus Verified',
-    description: 'Only verified students can order',
+    title: 'Student Profile',
+    description: 'Campus and student details in one place',
   },
   {
     icon: Users,
@@ -24,8 +24,8 @@ const trustFeatures = [
   },
   {
     icon: Smartphone,
-    title: 'Face Verified Pickup',
-    description: 'Secure collection at campus points',
+    title: 'Pickup Code Collection',
+    description: 'A demo one-time code confirms collection',
   },
   {
     icon: Clock,
@@ -38,11 +38,11 @@ const stats = [
   { value: 'Same Day', label: 'Campus delivery' },
   { value: 'Parent', label: 'Spending controls' },
   { value: 'Campus', label: 'Focused essentials' },
-  { value: 'Verified', label: 'Pickup experience' },
+  { value: 'Pickup Code', label: 'Collection check' },
 ];
 
 export default function Index() {
-  const { selectedCampus } = useStore();
+  const { selectedCampus, student, walletBalance } = useStore();
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const featuredProducts = mockProducts.slice(0, 8);
@@ -76,6 +76,7 @@ export default function Index() {
                 <Zap className="w-3.5 h-3.5 mr-1.5" />
                 Your selected city: {selectedCampus}
               </Badge>
+              <p className="mt-3 text-sm text-muted-foreground">Welcome, {student.fullName.split(' ')[0]} · Demo wallet {`₹${walletBalance.toLocaleString('en-IN')}`} · {student.institution}</p>
             </motion.div>
 
             {/* Headline */}
@@ -99,7 +100,7 @@ export default function Index() {
             >
               Everyday essentials delivered to your campus on the same day.
               Shop fruits, snacks, and hygiene essentials with parent-controlled spending
-              and verified campus pickup.
+              and pickup-code collection.
             </motion.p>
 
             {/* Search Bar */}
@@ -138,9 +139,10 @@ export default function Index() {
               <Link to="/parent">
                 <Button variant="hero-secondary" size="xl">
                   <Shield className="w-5 h-5" />
-                  Parent Login
+                  Parent Portal
                 </Button>
               </Link>
+              <Link to="/demo"><Button variant="outline" size="xl">Explore all demo roles</Button></Link>
             </motion.div>
 
             {/* Stats */}
@@ -226,7 +228,7 @@ export default function Index() {
               <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
                 Popular Essentials
               </h2>
-              <p className="text-muted-foreground mt-1">Most ordered on campus</p>
+              <p className="text-muted-foreground mt-1">Sample picks from the campus essentials catalog</p>
             </div>
             <Link to="/products" className="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
               View all <ChevronRight className="w-4 h-4" />
@@ -254,7 +256,7 @@ export default function Index() {
               How CampusKart Works
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Built for campus life. Fast, safe, and parent-approved.
+              A campus-first shopping journey with parent-aware spending and scheduled same-day windows.
             </p>
           </motion.div>
 
@@ -269,13 +271,13 @@ export default function Index() {
               {
                 step: '02',
                 title: 'Parent Approval',
-                description: 'Orders within limits proceed instantly. Parents get notifications.',
+                description: 'Orders within configured limits proceed. Requests beyond them wait for parent review.',
                 icon: Shield,
               },
               {
                 step: '03',
-                title: 'Quick Pickup',
-                description: 'Collect at campus points. Face verification ensures security.',
+                title: 'Campus Collection',
+                description: 'Collect at a campus point using the demo pickup code.',
                 icon: Zap,
               },
             ].map((item, index) => (
