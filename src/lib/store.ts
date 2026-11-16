@@ -1,22 +1,39 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useQuery } from '@tanstack/react-query';
+
+import snacks from '@/assets/cat-snacks.jpg';
+import sweet from '@/assets/cat-sweet.jpg';
+import pantry from '@/assets/cat-pantry.jpg';
+import home from '@/assets/cat-home.jpg';
+import care from '@/assets/cat-care.jpg';
+import fresh from '@/assets/cat-fresh.jpg';
 
 export interface Product {
   id: string;
+  sku?: string;
   name: string;
   price: number;
   image: string;
+  imageUrl?: string | null;
   category: string;
+  subcategory?: string | null;
+  brand?: string | null;
   availability: 'in-stock' | 'limited' | 'out-of-stock';
+  stockQuantity?: number;
+  reorderThreshold?: number;
   tags: string[];
   unit: string;
   description?: string;
+  isActive?: boolean;
 }
 
 export interface CartItem {
   product: Product;
   quantity: number;
 }
+
+export type CartLine = CartItem;
 
 export type OrderStatus = 'pending-approval' | 'placed' | 'packed' | 'on-the-way' | 'collected' | 'cancelled';
 
@@ -84,6 +101,8 @@ interface AppState {
   clearCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
+  getQuantityOf: (productId: string) => number;
+  quantityOf: (productId: string) => number;
   orders: Order[];
   addOrder: (order: Order) => void;
   approveOrder: (orderId: string) => boolean;
@@ -173,6 +192,8 @@ export const useStore = create<AppState>()(
       clearCart: () => set({ cart: [] }),
       getCartTotal: () => get().cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
       getCartCount: () => get().cart.reduce((sum, item) => sum + item.quantity, 0),
+      getQuantityOf: (productId) => get().cart.find((item) => item.product.id === productId)?.quantity ?? 0,
+      quantityOf: (productId) => get().cart.find((item) => item.product.id === productId)?.quantity ?? 0,
       orders: [],
       addOrder: (order) => set((state) => {
         const needsPayment = order.status !== 'pending-approval' && order.paymentMethod === 'wallet';
@@ -259,8 +280,119 @@ export const useStore = create<AppState>()(
 export const getSpentToday = (orders: Order[]) => calculateSpent(orders, 'today');
 export const getSpentThisMonth = (orders: Order[]) => calculateSpent(orders, 'month');
 
+export const inr = (n: number) =>
+  `₹${Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+
+export const GROUPS: Record<string, { image: string; group: string }> = {
+  'Fruits & Fresh': { image: fresh, group: 'Fresh' },
+  'Biscuits & Cookies': { image: sweet, group: 'Sweet' },
+  'Snacks & Namkeen': { image: snacks, group: 'Snacks' },
+  Chocolates: { image: sweet, group: 'Sweet' },
+  'Candies & Treats': { image: sweet, group: 'Sweet' },
+  'Bakery & Rusks': { image: pantry, group: 'Bakery & Breakfast' },
+  'Pickles & Add-ons': { image: pantry, group: 'Bakery & Breakfast' },
+  Beverages: { image: fresh, group: 'Fresh' },
+  'Coconut Water': { image: fresh, group: 'Fresh' },
+  'Hygiene & Home Care': { image: home, group: 'Home Care' },
+  Emergency: { image: care, group: 'Personal Care' },
+  Stationery: { image: pantry, group: 'Bakery & Breakfast' },
+  Chips: { image: snacks, group: 'Snacks' },
+  Nachos: { image: snacks, group: 'Snacks' },
+  'Bhujia & Mixtures': { image: snacks, group: 'Snacks' },
+  'Rusks & Wafers': { image: pantry, group: 'Bakery & Breakfast' },
+  Bread: { image: pantry, group: 'Bakery & Breakfast' },
+  'Breakfast Cereals': { image: pantry, group: 'Bakery & Breakfast' },
+  'Energy Bars': { image: pantry, group: 'Bakery & Breakfast' },
+  Chocolate: { image: sweet, group: 'Sweet' },
+  Biscuits: { image: sweet, group: 'Sweet' },
+  Fruits: { image: fresh, group: 'Fresh' },
+  'Dry Fruits': { image: fresh, group: 'Fresh' },
+  'Fabric Conditioner': { image: home, group: 'Home Care' },
+  'Detergent Powder & Bars': { image: home, group: 'Home Care' },
+  'Dishwashing Gels': { image: home, group: 'Home Care' },
+  Disinfectants: { image: home, group: 'Home Care' },
+  'Body Moisturizer': { image: care, group: 'Personal Care' },
+  'Bathing Soaps': { image: care, group: 'Personal Care' },
+  'Hair Oil & Serum': { image: care, group: 'Personal Care' },
+  'Oral Care': { image: care, group: 'Personal Care' },
+  'Hand Wash': { image: care, group: 'Personal Care' },
+  'Shampoo & Conditioner': { image: care, group: 'Personal Care' },
+  'Feminine Care': { image: care, group: 'Personal Care' },
+};
+
+export const CATEGORY_GROUPS = ['Snacks', 'Sweet', 'Bakery & Breakfast', 'Fresh', 'Personal Care', 'Home Care'];
+
+export function categoryGroup(category: string) {
+  return GROUPS[category]?.group ?? 'Snacks';
+}
+
+export function categoryImage(category: string) {
+  return GROUPS[category]?.image ?? snacks;
+}
+
+export function productImage(product: Pick<Product, 'category'> & { image?: string; imageUrl?: string | null }) {
+  return {
+    src: product.imageUrl ? `/products/${product.imageUrl}` : product.image || categoryImage(product.category),
+    fallback: categoryImage(product.category),
+  };
+}
+
+export type StockState = 'in-stock' | 'limited' | 'out-of-stock';
+
+export function stockState(p: Product): StockState {
+  if (p.availability === 'out-of-stock' || (p.stockQuantity !== undefined && p.stockQuantity <= 0)) return 'out-of-stock';
+  if (p.availability === 'limited' || (p.stockQuantity !== undefined && p.stockQuantity <= (p.reorderThreshold ?? 5))) return 'limited';
+  return 'in-stock';
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string;
+  product_name: string;
+  sku: string;
+  unit_price: number;
+  quantity: number;
+  line_total: number;
+}
+
+export interface ShopOrder {
+  id: string;
+  order_number: string;
+  status: string;
+  total: number;
+  delivery_slot: string;
+  created_at: string;
+  items: OrderItem[];
+}
+
+export function useOrders() {
+  const orders = useStore((state) => state.orders);
+  return useQuery({
+    queryKey: ['orders', 'local-demo', orders.length],
+    queryFn: async (): Promise<ShopOrder[]> => orders.map((order) => ({
+      id: order.id,
+      order_number: order.id,
+      status: order.status,
+      total: order.total,
+      delivery_slot: order.deliverySlot ?? order.estimatedDelivery,
+      created_at: order.createdAt instanceof Date ? order.createdAt.toISOString() : new Date(order.createdAt).toISOString(),
+      items: order.items.map((item, index) => ({
+        id: `${order.id}-${index}`,
+        order_id: order.id,
+        product_id: item.product.id,
+        product_name: item.product.name,
+        sku: item.product.sku ?? item.product.id,
+        unit_price: item.product.price,
+        quantity: item.quantity,
+        line_total: item.product.price * item.quantity,
+      })),
+    })),
+  });
+}
+
 // Mock Products Data
-export const mockProducts: Product[] = [
+const rawMockProducts: Product[] = [
   // Fruits & Fresh
   { id: 'f1', name: 'Fresh Bananas', price: 40, image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400', category: 'Fruits & Fresh', availability: 'in-stock', tags: ['healthy'], unit: '6 pcs' },
   { id: 'f2', name: 'Apple Pack', price: 120, image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400', category: 'Fruits & Fresh', availability: 'in-stock', tags: ['healthy'], unit: '4 pcs' },
@@ -384,6 +516,22 @@ export const mockProducts: Product[] = [
   { id: 'st4', name: 'Sticky Notes Pack', price: 40, image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=400', category: 'Stationery', availability: 'in-stock', tags: [], unit: '100 pcs' },
   { id: 'st5', name: 'Pencil Box', price: 85, image: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400', category: 'Stationery', availability: 'in-stock', tags: [], unit: '1 pc' },
 ];
+
+export const mockProducts: Product[] = rawMockProducts.map((product, index) => ({
+  ...product,
+  sku: product.sku ?? `CK-${String(index + 1).padStart(3, '0')}`,
+  stockQuantity: product.availability === 'out-of-stock' ? 0 : product.availability === 'limited' ? 3 : 25,
+  reorderThreshold: 5,
+  isActive: true,
+}));
+
+export function useProducts() {
+  return useQuery({
+    queryKey: ['products', 'store'],
+    queryFn: async (): Promise<Product[]> => mockProducts,
+    staleTime: 60_000,
+  });
+}
 
 export const categories = [
   { id: 'fruits', name: 'Fruits & Fresh', icon: '🍎', color: 'bg-green-100' },

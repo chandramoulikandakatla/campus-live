@@ -1,15 +1,15 @@
 import { type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Store, Receipt, ShoppingBag, LogOut } from 'lucide-react';
+import { Home, Store, Receipt, ShoppingBag, Wallet as WalletIcon, LogOut } from 'lucide-react';
 import { useAuth, useProfile } from '@/lib/auth';
-import { useCart } from '@/lib/cart';
-import { inr } from '@/lib/catalog';
+import { inr, useStore } from '@/lib/store';
 
 const NAV = [
   { to: '/home', label: 'Home', icon: Home },
   { to: '/shop', label: 'Shop', icon: Store },
-  { to: '/orders', label: 'Orders', icon: Receipt },
   { to: '/cart', label: 'Cart', icon: ShoppingBag },
+  { to: '/orders', label: 'Orders', icon: Receipt },
+  { to: '/wallet', label: 'Wallet', icon: WalletIcon },
 ];
 
 export function KioskShell({ children }: { children: ReactNode }) {
@@ -17,7 +17,7 @@ export function KioskShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { data: profile } = useProfile();
-  const count = useCart((s) => s.count());
+  const count = useStore((s) => s.getCartCount());
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -39,7 +39,7 @@ export function KioskShell({ children }: { children: ReactNode }) {
                 <Link
                   key={to}
                   to={to}
-                  className={`relative flex items-center gap-2 px-5 rounded-2xl text-sm font-medium transition-colors touch-target-md ${
+                  className={`relative flex items-center gap-2 px-4 rounded-2xl text-sm font-medium transition-colors touch-target-md ${
                     active
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-card text-muted-foreground border border-border active:bg-muted'
@@ -58,12 +58,16 @@ export function KioskShell({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          <div className="hidden lg:flex flex-col items-end leading-tight pl-4 border-l border-border">
+          <Link
+            to="/wallet"
+            className="hidden lg:flex flex-col items-end leading-tight pl-4 border-l border-border hover:opacity-80 transition-opacity"
+            title="View wallet statement"
+          >
             <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Wallet</span>
             <span className="font-display text-lg font-semibold">
               {profile ? inr(profile.wallet_balance) : '—'}
             </span>
-          </div>
+          </Link>
 
           <button
             onClick={async () => {

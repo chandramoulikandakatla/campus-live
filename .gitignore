@@ -28,3 +28,8 @@ dist-ssr
 .env.*
 !.env.example
 !.env.*.example
+
+# Agent Documentation & Context
+docs/
+AGENTS.md
+

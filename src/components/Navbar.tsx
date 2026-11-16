@@ -8,15 +8,15 @@ import { CampusSelector } from '@/components/CampusSelector';
 import { useStore } from '@/lib/store';
 
 const links = [
-  { href: '/', label: 'Student shop', icon: GraduationCap },
-  { href: '/products', label: 'Products', icon: Compass },
+  { href: '/home', label: 'Student store', icon: GraduationCap },
+  { href: '/shop', label: 'Shop', icon: Compass },
   { href: '/orders', label: 'Orders', icon: ClipboardList },
-  { href: '/parent', label: 'Parent', icon: Shield },
-  { href: '/college', label: 'College', icon: Building2 },
-  { href: '/operations', label: 'Operations', icon: PackageCheck },
   { href: '/wallet', label: 'Wallet', icon: Wallet },
-  { href: '/kiosk', label: 'Kiosk', icon: MonitorSmartphone },
+  { href: '/parent', label: 'Parent', icon: Shield },
+  { href: '/operations', label: 'Operations', icon: PackageCheck },
   { href: '/rider', label: 'Rider', icon: Bike },
+  { href: '/college', label: 'College', icon: Building2 },
+  { href: '/kiosk', label: 'Kiosk', icon: MonitorSmartphone },
   { href: '/demo', label: 'Demo center', icon: Compass },
 ];
 

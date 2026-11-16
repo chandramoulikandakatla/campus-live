@@ -12,7 +12,7 @@ export default function Login() {
   const updateStudent = useStore((state) => state.updateStudent);
   const navigate = useNavigate();
   const location = useLocation();
-  const destination = (location.state as { from?: string } | null)?.from || '/';
+  const destination = (location.state as { from?: string } | null)?.from || '/home';
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
   const [studentId, setStudentId] = useState('');
   const [pin, setPin] = useState('');
