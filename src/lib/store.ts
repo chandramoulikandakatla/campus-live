@@ -205,33 +205,52 @@ export const useStore = create<AppState>()(
     {
       name: 'campuskart-storage',
       version: 4,
-      migrate: (persistedState: any) => {
+      migrate: (persistedState: unknown) => {
+        const state = (persistedState && typeof persistedState === 'object' ? persistedState : {}) as Record<string, unknown>;
         const legacyCityNames: Record<string, string> = {
           'IIT Delhi': 'Delhi', 'IIT Bombay': 'Mumbai', 'IIT Madras': 'Chennai', 'IIT Kanpur': 'Kanpur',
           'BITS Pilani': 'Jaipur', 'NIT Trichy': 'Chennai', 'IIIT Hyderabad': 'Hyderabad', 'DTU Delhi': 'Delhi',
           'NSIT Delhi': 'Delhi', 'VIT Vellore': 'Vellore',
         };
-        const oldCity = persistedState?.selectedCampus;
-        const city = legacyCityNames[oldCity] ?? (CITY_NAMES.includes(oldCity) ? oldCity : defaultStudent.city);
-        const student = { ...defaultStudent, ...(persistedState?.student ?? {}), city };
-        const oldOrders = Array.isArray(persistedState?.orders) ? persistedState.orders : [];
-        const existingTransactions = Array.isArray(persistedState?.walletTransactions) ? persistedState.walletTransactions : [];
-        const migratedBalance = persistedState?.walletBalance ?? 2500;
+        const oldCity = typeof state.selectedCampus === 'string' ? state.selectedCampus : undefined;
+        const city = (oldCity && legacyCityNames[oldCity]) ?? (oldCity && CITY_NAMES.includes(oldCity) ? oldCity : defaultStudent.city);
+        const student = { ...defaultStudent, ...((state.student as Partial<StudentProfile>) ?? {}), city };
+        const oldOrders = Array.isArray(state.orders) ? state.orders : [];
+        const existingTransactions = Array.isArray(state.walletTransactions) ? (state.walletTransactions as WalletTransaction[]) : [];
+        const migratedBalance = typeof state.walletBalance === 'number' ? state.walletBalance : 2500;
         const migratedTransactions = existingTransactions.length > 0 ? existingTransactions : migratedBalance > 0 ? [makeWalletTransaction('top-up', migratedBalance, 'Opening demo wallet allocation')] : [];
-        const migratedOrders = oldOrders.map((order: any) => ({
-          ...order,
-          createdAt: typeof order.createdAt === 'string' ? order.createdAt : new Date(order.createdAt ?? Date.now()).toISOString(),
-          studentName: order.studentName ?? student.fullName,
-          studentId: order.studentId ?? student.studentId,
-          city: order.city ?? city,
-          institution: order.institution ?? persistedState?.selectedInstitution ?? defaultStudent.institution,
-          hostel: order.hostel ?? persistedState?.selectedHostel ?? defaultStudent.hostel,
-          paymentMethod: order.paymentMethod ?? 'wallet',
-          paymentStatus: order.paymentStatus ?? 'paid',
-          pickupCode: order.pickupCode ?? '123456',
-          status: order.status ?? 'placed',
-        }));
-        return { ...persistedState, student, orders: migratedOrders, selectedCampus: city, selectedInstitution: persistedState?.selectedInstitution ?? student.institution, selectedHostel: persistedState?.selectedHostel ?? student.hostel, walletBalance: migratedBalance, walletTransactions: migratedTransactions, parentLimits: { ...defaultLimits, ...(persistedState?.parentLimits ?? {}) } };
+        const migratedOrders: Order[] = oldOrders.map((rawOrder: unknown) => {
+          const order = (rawOrder && typeof rawOrder === 'object' ? rawOrder : {}) as Partial<Order> & Record<string, unknown>;
+          return {
+            id: typeof order.id === 'string' ? order.id : `CK-${Date.now()}`,
+            items: Array.isArray(order.items) ? (order.items as CartItem[]) : [],
+            total: typeof order.total === 'number' ? order.total : 0,
+            createdAt: typeof order.createdAt === 'string' ? order.createdAt : new Date(typeof order.createdAt === 'number' ? order.createdAt : Date.now()).toISOString(),
+            estimatedDelivery: typeof order.estimatedDelivery === 'string' ? order.estimatedDelivery : '12:00 – 1:00 PM',
+            deliverySlot: typeof order.deliverySlot === 'string' ? order.deliverySlot : undefined,
+            studentName: typeof order.studentName === 'string' ? order.studentName : student.fullName,
+            studentId: typeof order.studentId === 'string' ? order.studentId : student.studentId,
+            city: typeof order.city === 'string' ? order.city : city,
+            institution: typeof order.institution === 'string' ? order.institution : (typeof state.selectedInstitution === 'string' ? state.selectedInstitution : defaultStudent.institution),
+            hostel: typeof order.hostel === 'string' ? order.hostel : (typeof state.selectedHostel === 'string' ? state.selectedHostel : defaultStudent.hostel),
+            paymentMethod: (order.paymentMethod === 'pay-at-pickup' ? 'pay-at-pickup' : 'wallet'),
+            paymentStatus: (order.paymentStatus === 'pending' ? 'pending' : 'paid'),
+            pickupCode: typeof order.pickupCode === 'string' ? order.pickupCode : '123456',
+            status: (typeof order.status === 'string' ? (order.status as OrderStatus) : 'placed'),
+            note: typeof order.note === 'string' ? order.note : undefined,
+          };
+        });
+        return {
+          ...state,
+          student,
+          orders: migratedOrders,
+          selectedCampus: city,
+          selectedInstitution: typeof state.selectedInstitution === 'string' ? state.selectedInstitution : student.institution,
+          selectedHostel: typeof state.selectedHostel === 'string' ? state.selectedHostel : student.hostel,
+          walletBalance: migratedBalance,
+          walletTransactions: migratedTransactions,
+          parentLimits: { ...defaultLimits, ...((state.parentLimits as Partial<ParentLimits>) ?? {}) },
+        } as AppState;
       },
     }
   )

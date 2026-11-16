@@ -16,6 +16,7 @@ import OperationsDashboard from "./pages/OperationsDashboard";
 import Wallet from "./pages/Wallet";
 import KioskDemo from "./pages/KioskDemo";
 import RiderDashboard from "./pages/RiderDashboard";
+import Welcome from "./pages/Welcome";
 import { AuthProvider } from "./lib/auth";
 
 const queryClient = new QueryClient();
@@ -29,7 +30,9 @@ const App = () => (
         <HashRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/welcome" element={<Welcome />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/shop" element={<Products />} />
             <Route path="/home" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/demo" element={<DemoHub />} />
