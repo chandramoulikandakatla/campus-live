@@ -1,23 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  User,
   Shield,
   Wallet,
-  MapPin,
-  Building2,
   Phone,
   LogOut,
   CheckCircle2,
-  QrCode,
-  CreditCard,
-  ChevronRight,
-  Sparkles,
   GraduationCap,
   PackageCheck,
   Truck,
-  ExternalLink,
-  LogIn
+  Building2,
+  ChevronRight,
+  ExternalLink
 } from 'lucide-react';
 import {
   Dialog,
@@ -25,7 +19,6 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useStore, inr } from '@/lib/store';
 import { useAuth, useProfile } from '@/lib/auth';
@@ -38,12 +31,11 @@ interface Props {
 
 export function StudentProfileModal({ isOpen, onClose }: Props) {
   const navigate = useNavigate();
-  const { session, signOut, signIn } = useAuth();
+  const { signOut } = useAuth();
   const { data: profile } = useProfile();
   const student = useStore((s) => s.student);
   const walletBalance = useStore((s) => s.walletBalance);
   const parentLimits = useStore((s) => s.parentLimits);
-  const orders = useStore((s) => s.orders);
 
   const [activeTab, setActiveTab] = useState<'card' | 'limits' | 'portals'>('card');
 
@@ -70,60 +62,52 @@ export function StudentProfileModal({ isOpen, onClose }: Props) {
     navigate('/');
   };
 
-  const handleQuickDemoLogin = async () => {
-    try {
-      await signIn('CK2026001', '123456');
-      toast.success('Signed in as Aarav Mehta (CK2026001)');
-      onClose();
-      navigate('/home');
-    } catch {
-      toast.error('Could not complete demo sign in');
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden border-border bg-background">
-        {/* Header Profile Banner */}
-        <div className="relative p-6 bg-gradient-to-br from-primary/20 via-primary/5 to-background border-b border-border">
+      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden border-zinc-200 dark:border-zinc-800 bg-background shadow-lg">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Student Identity Pass & Wallet</DialogTitle>
+        </DialogHeader>
+
+        {/* Clean Header Profile Strip */}
+        <div className="p-6 bg-zinc-50 dark:bg-zinc-900/60 border-b border-border">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-primary to-primary/80 text-primary-foreground font-display font-extrabold text-xl flex items-center justify-center shadow-md">
-                  {initials}
-                </div>
-                <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] ring-2 ring-background">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                </div>
+            <div className="flex items-center gap-3.5">
+              <div className="h-14 w-14 rounded-xl bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 font-display font-bold text-lg flex items-center justify-center shadow-xs">
+                {initials}
               </div>
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-display text-lg font-bold">{fullName}</h3>
-                  <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-bold">
-                    Active Student
-                  </Badge>
+                  <h3 className="font-display text-lg font-bold text-foreground">{fullName}</h3>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-semibold border border-emerald-500/20">
+                    Enrolled
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground font-mono mt-0.5">ID: {studentId}</p>
-                <p className="text-xs text-muted-foreground">{institution}</p>
+                <p className="text-xs text-muted-foreground truncate max-w-[260px]">{institution}</p>
               </div>
             </div>
           </div>
 
-          {/* Quick tab switcher */}
-          <div className="mt-5 flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border/40 text-xs font-semibold">
+          {/* Segmented Tab Controls */}
+          <div className="mt-5 flex items-center gap-1 p-1 rounded-xl bg-zinc-200/60 dark:bg-zinc-800 text-xs font-semibold">
             <button
               onClick={() => setActiveTab('card')}
               className={`flex-1 py-1.5 rounded-lg transition-all ${
-                activeTab === 'card' ? 'bg-card text-foreground shadow-sm font-bold' : 'text-muted-foreground'
+                activeTab === 'card'
+                  ? 'bg-background text-foreground shadow-xs font-bold'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              Student ID Card
+              Digital Pass
             </button>
             <button
               onClick={() => setActiveTab('limits')}
               className={`flex-1 py-1.5 rounded-lg transition-all ${
-                activeTab === 'limits' ? 'bg-card text-foreground shadow-sm font-bold' : 'text-muted-foreground'
+                activeTab === 'limits'
+                  ? 'bg-background text-foreground shadow-xs font-bold'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               Wallet & Policies
@@ -131,145 +115,143 @@ export function StudentProfileModal({ isOpen, onClose }: Props) {
             <button
               onClick={() => setActiveTab('portals')}
               className={`flex-1 py-1.5 rounded-lg transition-all ${
-                activeTab === 'portals' ? 'bg-card text-foreground shadow-sm font-bold' : 'text-muted-foreground'
+                activeTab === 'portals'
+                  ? 'bg-background text-foreground shadow-xs font-bold'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              Switch Portal
+              Portals
             </button>
           </div>
         </div>
 
-        <div className="p-5 space-y-4 max-h-[65vh] overflow-y-auto">
-          {/* TAB 1: DIGITAL STUDENT ID CARD */}
+        {/* Tab Content Body */}
+        <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          {/* TAB 1: DIGITAL PASS */}
           {activeTab === 'card' && (
             <div className="space-y-4">
-              {/* Virtual Identity Card Container */}
-              <div className="p-4 rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 shadow-sm space-y-3">
-                <div className="flex justify-between items-center text-xs border-b border-border pb-2.5">
-                  <span className="font-display font-bold text-primary tracking-wider uppercase text-[10px]">
-                    Sri Chaitanya Campus Digital Pass
+              <div className="p-5 rounded-2xl border border-border bg-card space-y-4 shadow-xs">
+                <div className="flex justify-between items-center text-xs border-b border-border pb-3">
+                  <span className="font-display font-bold text-foreground uppercase tracking-wider text-[11px]">
+                    University Campus Pass
                   </span>
                   <span className="font-mono text-[10px] text-muted-foreground">VALID: 2026–2027</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Hostel Block</span>
-                    <p className="font-semibold">{hostel}</p>
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Hostel Block</span>
+                    <p className="font-medium text-foreground mt-0.5">{hostel}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Campus Location</span>
-                    <p className="font-semibold">{campus} Pilot Hub</p>
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Campus</span>
+                    <p className="font-medium text-foreground mt-0.5">{campus} Pilot Hub</p>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Guardian</span>
-                    <p className="font-semibold">{parentName}</p>
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Guardian</span>
+                    <p className="font-medium text-foreground mt-0.5">{parentName}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] text-muted-foreground uppercase font-bold">Emergency Phone</span>
-                    <p className="font-semibold">{parentContact}</p>
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Emergency Contact</span>
+                    <p className="font-medium text-foreground mt-0.5">{parentContact}</p>
                   </div>
                 </div>
 
-                {/* Simulated Barcode */}
-                <div className="pt-2 border-t border-border/80 flex flex-col items-center justify-center">
-                  <div className="h-10 w-full flex items-center justify-center gap-1 bg-white p-2 rounded-lg">
-                    {/* Barcode bars */}
+                {/* Clean Barcode Component */}
+                <div className="pt-3 border-t border-border flex flex-col items-center justify-center">
+                  <div className="h-10 w-full flex items-center justify-center gap-1 bg-white p-2 rounded-lg border border-zinc-200">
                     {[3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 3, 1, 2, 4, 1, 3, 2, 3, 1, 4, 2, 1, 3, 2, 4, 1, 2, 3].map((w, i) => (
                       <div
                         key={i}
-                        className="h-full bg-slate-900"
+                        className="h-full bg-zinc-900"
                         style={{ width: `${w * 1.5}px` }}
                       />
                     ))}
                   </div>
-                  <span className="text-[9px] font-mono tracking-widest text-muted-foreground mt-1">
+                  <span className="text-[10px] font-mono tracking-widest text-muted-foreground mt-1.5">
                     *{studentId}*
                   </span>
                 </div>
               </div>
 
               {/* Wallet Summary */}
-              <div className="p-3.5 rounded-xl border border-border bg-muted/30 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2.5">
+              <div className="p-4 rounded-xl border border-border bg-muted/40 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                     <Wallet className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="font-semibold">Student Wallet Balance</p>
-                    <p className="text-[11px] text-muted-foreground">{inr(walletBalance)} Available</p>
+                    <p className="font-semibold text-foreground">Available Balance</p>
+                    <p className="text-[11px] text-muted-foreground font-mono">{inr(walletBalance)}</p>
                   </div>
                 </div>
 
                 <Link to="/wallet" onClick={onClose}>
                   <Button size="sm" variant="outline" className="h-8 text-xs font-semibold">
-                    Open Wallet →
+                    View Ledger →
                   </Button>
                 </Link>
               </div>
             </div>
           )}
 
-          {/* TAB 2: LIMITS & PARENT POLICIES */}
+          {/* TAB 2: LIMITS & POLICIES */}
           {activeTab === 'limits' && (
-            <div className="space-y-3 text-xs">
-              <div className="p-4 rounded-xl border border-border bg-card space-y-2.5">
-                <h4 className="font-bold flex items-center gap-1.5 text-sm">
-                  <Shield className="w-4 h-4 text-emerald-500" /> Parent Spending Controls
-                </h4>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <div className="p-2.5 rounded-lg bg-muted/40 border border-border/40">
-                    <span className="text-[10px] text-muted-foreground">Daily Allowance Limit</span>
-                    <p className="font-display text-sm font-bold mt-0.5">{inr(parentLimits.daily)}</p>
+            <div className="space-y-4 text-xs">
+              <div className="p-4 rounded-xl border border-border bg-card space-y-3">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-emerald-500" />
+                  <h4 className="font-semibold text-sm text-foreground">Parent Spending Safeguards</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5 pt-1">
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/60">
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Daily Allowance</span>
+                    <p className="font-mono text-sm font-bold text-foreground mt-0.5">{inr(parentLimits.daily)}</p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-muted/40 border border-border/40">
-                    <span className="text-[10px] text-muted-foreground">Monthly Cap</span>
-                    <p className="font-display text-sm font-bold mt-0.5">{inr(parentLimits.monthly)}</p>
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/60">
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Monthly Cap</span>
+                    <p className="font-mono text-sm font-bold text-foreground mt-0.5">{inr(parentLimits.monthly)}</p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-muted/40 border border-border/40">
-                    <span className="text-[10px] text-muted-foreground">Approval Threshold</span>
-                    <p className="font-display text-sm font-bold mt-0.5">Above {inr(parentLimits.approvalAbove)}</p>
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/60">
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Approval Threshold</span>
+                    <p className="font-mono text-sm font-bold text-foreground mt-0.5">Above {inr(parentLimits.approvalAbove)}</p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-muted/40 border border-border/40">
-                    <span className="text-[10px] text-muted-foreground">Allowed Hours</span>
-                    <p className="font-display text-xs font-bold mt-0.5">{parentLimits.allowedFrom} – {parentLimits.allowedUntil}</p>
+                  <div className="p-3 rounded-lg bg-muted/50 border border-border/60">
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Allowed Hours</span>
+                    <p className="font-mono text-xs font-bold text-foreground mt-0.5">
+                      {parentLimits.allowedFrom} – {parentLimits.allowedUntil}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-border bg-card flex items-center justify-between">
+              <div className="p-4 rounded-xl border border-border bg-card flex items-center justify-between">
                 <div>
-                  <p className="font-semibold">Review or Modify Rules</p>
-                  <p className="text-[11px] text-muted-foreground">Parents can adjust allowances in Parent Portal.</p>
+                  <p className="font-semibold text-foreground">Parent Oversight Portal</p>
+                  <p className="text-[11px] text-muted-foreground">Adjust policies or add funds to this student wallet.</p>
                 </div>
                 <Link to="/parent" onClick={onClose}>
                   <Button size="sm" variant="outline" className="h-8 text-xs font-semibold">
-                    Parent Portal →
+                    Open Parent →
                   </Button>
                 </Link>
               </div>
             </div>
           )}
 
-          {/* TAB 3: SHIFT TO OTHER PORTALS */}
+          {/* TAB 3: PORTAL SWITCHER */}
           {activeTab === 'portals' && (
             <div className="space-y-2 text-xs">
-              <p className="text-muted-foreground text-[11px] font-semibold mb-1">
-                Directly shift between the 5 operational portals:
-              </p>
-
               <Link
                 to="/home"
                 onClick={onClose}
-                className="p-3 rounded-xl border border-border bg-card hover:border-primary/40 flex items-center justify-between transition-colors"
+                className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:bg-muted/60 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                    <GraduationCap className="w-4 h-4" />
-                  </div>
+                  <GraduationCap className="w-4 h-4 text-primary" />
                   <div>
-                    <p className="font-bold">Student Storefront</p>
-                    <p className="text-[11px] text-muted-foreground">Kiosk catalog, cart, and wallet</p>
+                    <p className="font-semibold text-foreground">Student Storefront</p>
+                    <p className="text-[11px] text-muted-foreground">Catalog, cart, and self-checkout</p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -278,15 +260,13 @@ export function StudentProfileModal({ isOpen, onClose }: Props) {
               <Link
                 to="/parent"
                 onClick={onClose}
-                className="p-3 rounded-xl border border-border bg-card hover:border-primary/40 flex items-center justify-between transition-colors"
+                className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:bg-muted/60 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
-                    <Shield className="w-4 h-4" />
-                  </div>
+                  <Shield className="w-4 h-4 text-emerald-500" />
                   <div>
-                    <p className="font-bold">Parent Guardian Portal</p>
-                    <p className="text-[11px] text-muted-foreground">Allowances, approval queue, and analytics</p>
+                    <p className="font-semibold text-foreground">Parent Portal</p>
+                    <p className="text-[11px] text-muted-foreground">Allowance controls & order approvals</p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -295,15 +275,13 @@ export function StudentProfileModal({ isOpen, onClose }: Props) {
               <Link
                 to="/operations"
                 onClick={onClose}
-                className="p-3 rounded-xl border border-border bg-card hover:border-primary/40 flex items-center justify-between transition-colors"
+                className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:bg-muted/60 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-                    <PackageCheck className="w-4 h-4" />
-                  </div>
+                  <PackageCheck className="w-4 h-4 text-amber-500" />
                   <div>
-                    <p className="font-bold">Operations Hub</p>
-                    <p className="text-[11px] text-muted-foreground">Order packing, inventory edits & adjustments</p>
+                    <p className="font-semibold text-foreground">Operations Hub</p>
+                    <p className="text-[11px] text-muted-foreground">Kiosk fulfillment & inventory control</p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -312,15 +290,13 @@ export function StudentProfileModal({ isOpen, onClose }: Props) {
               <Link
                 to="/rider"
                 onClick={onClose}
-                className="p-3 rounded-xl border border-border bg-card hover:border-primary/40 flex items-center justify-between transition-colors"
+                className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:bg-muted/60 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-                    <Truck className="w-4 h-4" />
-                  </div>
+                  <Truck className="w-4 h-4 text-blue-500" />
                   <div>
-                    <p className="font-bold">Logistics & Transportation</p>
-                    <p className="text-[11px] text-muted-foreground">Live EV Shuttle telemetry and route simulation</p>
+                    <p className="font-semibold text-foreground">Logistics Fleet</p>
+                    <p className="text-[11px] text-muted-foreground">Campus delivery and EV dispatch</p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -329,15 +305,13 @@ export function StudentProfileModal({ isOpen, onClose }: Props) {
               <Link
                 to="/college"
                 onClick={onClose}
-                className="p-3 rounded-xl border border-border bg-card hover:border-primary/40 flex items-center justify-between transition-colors"
+                className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:bg-muted/60 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
-                    <Building2 className="w-4 h-4" />
-                  </div>
+                  <Building2 className="w-4 h-4 text-indigo-400" />
                   <div>
-                    <p className="font-bold">College Admin Dashboard</p>
-                    <p className="text-[11px] text-muted-foreground">Anonymized campus efficiency metrics</p>
+                    <p className="font-semibold text-foreground">College Administration</p>
+                    <p className="text-[11px] text-muted-foreground">Anonymized campus analytics & GMV</p>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -347,28 +321,22 @@ export function StudentProfileModal({ isOpen, onClose }: Props) {
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
-          {session ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleSignOut}
-              className="text-xs font-semibold"
-            >
-              <LogOut className="w-3.5 h-3.5 mr-1.5" /> End Student Session
-            </Button>
-          ) : (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleQuickDemoLogin}
-              className="text-xs font-semibold"
-            >
-              <LogIn className="w-3.5 h-3.5 mr-1.5" /> Quick Demo Sign-In
-            </Button>
-          )}
+        <div className="p-4 bg-muted/30 border-t border-border flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className="text-xs text-destructive hover:bg-destructive/10"
+          >
+            <LogOut className="w-3.5 h-3.5 mr-1.5" /> Sign Out
+          </Button>
 
-          <Button variant="ghost" size="sm" onClick={onClose} className="text-xs">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onClose}
+            className="text-xs font-semibold"
+          >
             Close
           </Button>
         </div>

@@ -257,15 +257,15 @@ export default function Orders() {
                       className="w-full text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       <Navigation className="w-3.5 h-3.5 mr-1.5" />
-                      Track Live (Zomato-Style)
+                      Live Delivery Tracking
                     </Button>
 
                     <Link
-                      to="/rider"
-                      className="inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-colors"
+                      to={`/track/${selectedOrder.id}`}
+                      className="inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold transition-colors"
                     >
-                      <Truck className="w-3.5 h-3.5" />
-                      Campus Fleet Map →
+                      <Truck className="w-3.5 h-3.5 text-primary" />
+                      Full-Screen Map →
                     </Link>
                   </div>
                 </div>
