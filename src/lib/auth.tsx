@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useStore } from '@/lib/store';
 
 export interface DemoUser {
   id: string;
@@ -90,15 +91,16 @@ export function useAuth() {
 
 export function useProfile() {
   const { user } = useAuth();
+  const walletBalance = useStore((state) => state.walletBalance);
   return useQuery({
-    queryKey: ['profile', user?.id],
+    queryKey: ['profile', user?.id, walletBalance],
     enabled: !!user,
     queryFn: async (): Promise<Profile | null> => user ? ({
       id: user.id,
       student_id: user.user_metadata.student_id,
       full_name: user.user_metadata.full_name,
       campus: user.user_metadata.campus,
-      wallet_balance: 2500,
+      wallet_balance: walletBalance,
     }) : null,
   });
 }
