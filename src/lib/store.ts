@@ -1384,7 +1384,11 @@ export const useStore = create<AppStore>()(
         parentAuthed: state.parentAuthed,
         linkedStudentId: state.linkedStudentId,
         walletBalance: state.walletBalance,
-        walletTransactions: state.walletTransactions
+        walletTransactions: state.walletTransactions,
+        orders: state.orders,
+        cart: state.cart,
+        student: state.student,
+        parentLimits: state.parentLimits
       })
     }
   )

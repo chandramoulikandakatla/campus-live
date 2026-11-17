@@ -22,6 +22,20 @@ export default function Login() {
   const [error, setError] = useState('');
   if (session) return <Navigate to={destination} replace />;
 
+  const handleQuickDemoSignIn = async () => {
+    setBusy(true);
+    try {
+      await signIn('CK2026001', '123456');
+      updateStudent({ studentId: 'CK2026001', fullName: 'Aarav Mehta' });
+      toast.success('Signed in as Aarav Mehta (Demo Student)');
+      navigate(destination, { replace: true });
+    } catch {
+      toast.error('Failed to log in as demo student.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
@@ -53,6 +67,23 @@ export default function Login() {
         <div className="mx-auto grid max-w-4xl gap-12 py-12 md:grid-cols-[0.9fr_1.1fr] md:py-24">
           <section className="flex flex-col justify-center"><span className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground"><ShieldCheck className="h-6 w-6" /></span><h1 className="font-display text-4xl font-semibold">Your campus,<br />within reach.</h1><p className="mt-4 max-w-sm leading-relaxed text-muted-foreground">Create a local demo profile with a Student ID and six-digit PIN to explore the student journey. This presentation flow does not verify identity.</p></section>
           <section className="border-t border-border pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
+            {/* Quick Demo Login Option */}
+            <div className="mb-6 p-4 rounded-2xl border border-primary/20 bg-primary/5 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold text-foreground">Demo Presentation Mode</p>
+                <p className="text-[11px] text-muted-foreground">Sign in instantly as Aarav Mehta (₹2,500 Wallet)</p>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleQuickDemoSignIn}
+                disabled={busy}
+                className="text-xs font-semibold"
+              >
+                ⚡ 1-Click Sign-In
+              </Button>
+            </div>
+
             <div className="mb-7 flex border-b border-border"><button type="button" onClick={() => { setMode('sign-in'); setError(''); }} className={`min-h-12 border-b-2 px-4 text-sm font-medium ${mode === 'sign-in' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground'}`}>Sign in</button><button type="button" onClick={() => { setMode('sign-up'); setError(''); }} className={`min-h-12 border-b-2 px-4 text-sm font-medium ${mode === 'sign-up' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground'}`}>Create account</button></div>
             <form onSubmit={submit} className="space-y-5">
               {mode === 'sign-up' && <label className="block space-y-2 text-sm font-medium">Full name<Input autoComplete="name" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Your name" required /></label>}

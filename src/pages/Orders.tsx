@@ -7,6 +7,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useStore, type OrderStatus } from '@/lib/store';
+import { downloadOrderReceiptPdf } from '@/lib/pdfReceipt';
+import { ZomatoStyleTrackingModal } from '@/components/logistics/ZomatoStyleTrackingModal';
 
 const money = (value: number) => `₹${value.toLocaleString('en-IN')}`;
 
@@ -25,6 +27,7 @@ export default function Orders() {
   const orders = useStore((state) => state.orders);
   const student = useStore((state) => state.student);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
   const sortedOrders = useMemo(
     () => [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [orders]
@@ -33,38 +36,12 @@ export default function Orders() {
 
   const downloadReceipt = (order: typeof selectedOrder) => {
     if (!order) return;
-    const rows = [
-      ['CampusKart demo order receipt'],
-      ['Order ID', order.id],
-      ['Date', new Date(order.createdAt).toLocaleString('en-IN')],
-      ['Student', order.studentName],
-      ['Student ID', order.studentId],
-      ['Institution', order.institution],
-      ['Campus', order.city],
-      ['Pickup location', order.hostel],
-      ['Delivery window', order.deliverySlot ?? order.estimatedDelivery],
-      ['Payment status', order.paymentStatus],
-      [],
-      ['Product', 'Quantity', 'Unit price (INR)', 'Line total (INR)'],
-      ...order.items.map((item) => [
-        item.product.name,
-        String(item.quantity),
-        String(item.product.price),
-        String(item.product.price * item.quantity),
-      ]),
-      [],
-      ['Total (INR)', String(order.total)],
-      ['Pickup code (demo)', order.pickupCode],
-      ['Notice', 'Illustrative demo receipt only. Not a tax invoice or proof of real payment.'],
-    ];
-    const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = `campuskart-receipt-${order.id}.csv`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-    toast.success('Demo order receipt downloaded.');
+    try {
+      downloadOrderReceiptPdf(order);
+      toast.success(`Official PDF receipt downloaded for ${order.id}`);
+    } catch {
+      toast.error('Could not generate receipt PDF.');
+    }
   };
 
   return (
@@ -239,7 +216,7 @@ export default function Orders() {
                   <strong className="font-display text-xl">{money(selectedOrder.total)}</strong>
                 </div>
                 <Button variant="outline" className="mt-4 w-full" onClick={() => downloadReceipt(selectedOrder)}>
-                  <Download className="mr-2 h-4 w-4" /> Download demo receipt
+                  <Download className="mr-2 h-4 w-4" /> Download official PDF receipt
                 </Button>
               </div>
 
@@ -272,13 +249,25 @@ export default function Orders() {
                     </div>
                   </div>
 
-                  <Link
-                    to="/rider"
-                    className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-colors"
-                  >
-                    <Navigation className="w-3.5 h-3.5" />
-                    Open Live Campus Route Map & Telematics →
-                  </Link>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => setTrackingOrder(selectedOrder)}
+                      className="w-full text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      <Navigation className="w-3.5 h-3.5 mr-1.5" />
+                      Track Live (Zomato-Style)
+                    </Button>
+
+                    <Link
+                      to="/rider"
+                      className="inline-flex items-center justify-center gap-1.5 w-full py-1.5 px-3 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-colors"
+                    >
+                      <Truck className="w-3.5 h-3.5" />
+                      Campus Fleet Map →
+                    </Link>
+                  </div>
                 </div>
               )}
 
@@ -329,6 +318,13 @@ export default function Orders() {
           )}
         </div>
       )}
+
+      {/* Zomato-Style Live Delivery Tracking Modal */}
+      <ZomatoStyleTrackingModal
+        order={trackingOrder}
+        isOpen={!!trackingOrder}
+        onClose={() => setTrackingOrder(null)}
+      />
     </main>
   );
 }

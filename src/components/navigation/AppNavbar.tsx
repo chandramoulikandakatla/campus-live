@@ -16,7 +16,9 @@ import {
   ClipboardList,
   Store,
   Home,
-  Truck
+  Truck,
+  ChevronDown,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +26,7 @@ import { CampusSelector } from '@/components/CampusSelector';
 import { useStore, inr } from '@/lib/store';
 import { useAuth, useProfile } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
+import { StudentProfileModal } from '@/components/profile/StudentProfileModal';
 
 export function AppNavbar() {
   const location = useLocation();
@@ -34,7 +37,18 @@ export function AppNavbar() {
   const cartCount = useStore((s) => s.getCartCount());
   const walletBalance = useStore((s) => s.walletBalance);
   const orders = useStore((s) => s.orders);
+  const student = useStore((s) => s.student);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+
+  const fullName = profile?.full_name || student.fullName || 'Aarav Mehta';
+  const studentFirstName = fullName.split(' ')[0] || 'Aarav';
+  const initials = fullName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   const pendingApprovalsCount = orders.filter((o) => o.status === 'pending-approval').length;
   const activeOpsCount = orders.filter((o) => o.status !== 'collected' && o.status !== 'cancelled').length;
@@ -62,8 +76,24 @@ export function AppNavbar() {
             </span>
           </Link>
 
-          {/* Unified 4-Portal Segmented Bar */}
-          <nav aria-label="Portal Switcher" className="hidden lg:flex items-center gap-1 rounded-xl bg-muted/60 p-1 border border-border/40 text-xs">
+          {/* Mobile/Compact Portal Selector (visible on < md) */}
+          <div className="flex md:hidden">
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/80 border border-border/60 text-xs font-semibold"
+              title="Switch campus portal"
+            >
+              {isStudent && <><GraduationCap className="w-3.5 h-3.5 text-primary" /><span>Student</span></>}
+              {isParent && <><Shield className="w-3.5 h-3.5 text-emerald-500" /><span>Parent</span></>}
+              {isOps && <><PackageCheck className="w-3.5 h-3.5 text-amber-500" /><span>Ops</span></>}
+              {isDelivery && <><Truck className="w-3.5 h-3.5 text-blue-500" /><span>Logistics</span></>}
+              {isCollege && <><Building2 className="w-3.5 h-3.5 text-indigo-400" /><span>College</span></>}
+              <ChevronDown className="w-3 h-3 text-muted-foreground" />
+            </button>
+          </div>
+
+          {/* Unified 5-Portal Segmented Bar (visible on md+) */}
+          <nav aria-label="Portal Switcher" className="hidden md:flex items-center gap-1 rounded-xl bg-muted/60 p-1 border border-border/40 text-xs">
             <Link
               to="/home"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
@@ -233,19 +263,19 @@ export function AppNavbar() {
             )}
           </button>
 
-          {/* Sign Out / End Session (if student is signed in) */}
-          {session && (
-            <button
-              onClick={async () => {
-                await signOut();
-                navigate('/');
-              }}
-              title="End session"
-              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          )}
+          {/* Student Profile Button (Always Accessible) */}
+          <button
+            type="button"
+            onClick={() => setProfileModalOpen(true)}
+            aria-label="Student profile and digital ID"
+            className="flex h-9 items-center gap-1.5 px-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted transition-colors text-xs font-semibold shadow-sm"
+            title="Student Profile & Digital ID"
+          >
+            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-primary/15 text-primary font-bold text-[10px]">
+              {initials}
+            </div>
+            <span className="hidden sm:inline font-medium text-xs">{studentFirstName}</span>
+          </button>
 
           {/* Mobile Hamburger Toggle */}
           <button
@@ -348,6 +378,12 @@ export function AppNavbar() {
           </div>
         </div>
       )}
+
+      {/* Student Profile & Digital ID Modal */}
+      <StudentProfileModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+      />
     </header>
   );
 }

@@ -111,11 +111,14 @@ export default function Cart() {
             )}
           </div>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Link to="/track" className="flex-1">
+              <Button className="w-full bg-primary text-primary-foreground">Track live (Zomato-style)</Button>
+            </Link>
             <Link to="/orders" className="flex-1">
-              <Button className="w-full">Track order</Button>
+              <Button variant="outline" className="w-full">View orders</Button>
             </Link>
             <Link to="/shop" className="flex-1">
-              <Button variant="outline" className="w-full">Continue shopping</Button>
+              <Button variant="ghost" className="w-full">Continue shopping</Button>
             </Link>
           </div>
           <p className="mt-5 text-xs text-muted-foreground">

@@ -14,6 +14,8 @@ import ParentDashboard from "./pages/ParentDashboard";
 import OperationsDashboard from "./pages/OperationsDashboard";
 import RiderDashboard from "./pages/RiderDashboard";
 import CollegeDashboard from "./pages/CollegeDashboard";
+import OrderTracking from "./pages/OrderTracking";
+import StudentProfilePage from "./pages/StudentProfilePage";
 import KioskDemo from "./pages/KioskDemo";
 import DemoHub from "./pages/DemoHub";
 import NotFound from "./pages/NotFound";
@@ -45,6 +47,9 @@ const App = () => (
               <Route path="/cart" element={<RequireAuth><Cart /></RequireAuth>} />
               <Route path="/orders" element={<RequireAuth><Orders /></RequireAuth>} />
               <Route path="/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+              <Route path="/profile" element={<StudentProfilePage />} />
+              <Route path="/track" element={<OrderTracking />} />
+              <Route path="/track/:orderId" element={<OrderTracking />} />
 
               {/* Role & Management Portals */}
               <Route path="/parent" element={<ParentDashboard />} />
