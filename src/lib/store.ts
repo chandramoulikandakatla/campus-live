@@ -359,6 +359,169 @@ const makeWalletTransaction = (
 const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
 const simDelay = (ms: number) => new Promise((resolve) => setTimeout(resolve, isTestEnv ? 0 : ms));
 
+export const getInitialOrders = (): Order[] => {
+  if (isTestEnv) return [];
+  return [
+    {
+      id: 'ORD-2026-8801',
+      studentName: 'Aarav Mehta',
+      studentId: 'CK2026001',
+      city: 'Hyderabad',
+      institution: 'Sri Chaitanya & Narayana Junior Academy',
+      hostel: 'B-Block Hostel',
+      createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      status: 'on-the-way',
+      total: 215,
+      paymentMethod: 'wallet',
+      paymentStatus: 'paid',
+      pickupCode: '334190',
+      deliverySlot: 'EV Shuttle #04 · ETA 4 mins (Hostel B Lobby Locker #08)',
+      items: [
+        {
+          productId: 'f1',
+          quantity: 2,
+          qty: 2,
+          product: { id: 'f1', name: 'Fresh Bananas', price: 40, image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400', category: 'Fruits & Fresh', availability: 'in-stock', tags: ['healthy'], unit: '6 pcs' }
+        },
+        {
+          productId: 'b1',
+          quantity: 1,
+          qty: 1,
+          product: { id: 'b1', name: 'Digestive Biscuits', price: 35, image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400', category: 'Biscuits & Cookies', availability: 'in-stock', tags: ['healthy'], unit: '100g' }
+        },
+        {
+          productId: 'c1',
+          quantity: 1,
+          qty: 1,
+          product: { id: 'c1', name: 'Dairy Milk Silk', price: 80, image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400', category: 'Chocolates', availability: 'in-stock', tags: [], unit: '60g' }
+        }
+      ]
+    },
+    {
+      id: 'ORD-2026-8802',
+      studentName: 'Aarav Mehta',
+      studentId: 'CK2026001',
+      city: 'Hyderabad',
+      institution: 'Sri Chaitanya & Narayana Junior Academy',
+      hostel: 'B-Block Hostel',
+      createdAt: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
+      status: 'packed',
+      total: 155,
+      paymentMethod: 'wallet',
+      paymentStatus: 'paid',
+      pickupCode: '549812',
+      deliverySlot: 'Block A Ground Floor Smart Kiosk #1',
+      items: [
+        {
+          productId: 's4',
+          quantity: 1,
+          qty: 1,
+          product: { id: 's4', name: 'Roasted Makhana', price: 65, image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400', category: 'Snacks & Namkeen', availability: 'limited', tags: ['healthy', 'parent-approved'], unit: '100g' }
+        },
+        {
+          productId: 'f4',
+          quantity: 1,
+          qty: 1,
+          product: { id: 'f4', name: 'Mixed Fruit Bowl', price: 90, image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400', category: 'Fruits & Fresh', availability: 'in-stock', tags: ['healthy'], unit: '250g' }
+        }
+      ]
+    },
+    {
+      id: 'ORD-2026-8803',
+      studentName: 'Aarav Mehta',
+      studentId: 'CK2026001',
+      city: 'Hyderabad',
+      institution: 'Sri Chaitanya & Narayana Junior Academy',
+      hostel: 'B-Block Hostel',
+      createdAt: new Date(Date.now() - 50 * 60 * 1000).toISOString(),
+      status: 'placed',
+      total: 180,
+      paymentMethod: 'wallet',
+      paymentStatus: 'paid',
+      pickupCode: '773214',
+      deliverySlot: 'Lunch Window (12:30 PM - 1:45 PM)',
+      items: [
+        {
+          productId: 'f3',
+          quantity: 1,
+          qty: 1,
+          product: { id: 'f3', name: 'Orange Juice', price: 80, image: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400', category: 'Fruits & Fresh', availability: 'limited', tags: ['healthy'], unit: '500ml' }
+        },
+        {
+          productId: 's1',
+          quantity: 2,
+          qty: 2,
+          product: { id: 's1', name: 'Aloo Bhujia', price: 45, image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400', category: 'Snacks & Namkeen', availability: 'in-stock', tags: [], unit: '200g' }
+        }
+      ]
+    },
+    {
+      id: 'ORD-2026-8804',
+      studentName: 'Aarav Mehta',
+      studentId: 'CK2026001',
+      city: 'Hyderabad',
+      institution: 'Sri Chaitanya & Narayana Junior Academy',
+      hostel: 'B-Block Hostel',
+      createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+      status: 'pending-approval',
+      total: 450,
+      paymentMethod: 'wallet',
+      paymentStatus: 'pending',
+      pickupCode: '882190',
+      deliverySlot: 'Evening Dispersal (4:15 PM - 5:30 PM)',
+      items: [
+        {
+          productId: 'st1',
+          quantity: 2,
+          qty: 2,
+          product: { id: 'st1', name: 'Notebook 200 Pages', price: 60, image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=400', category: 'Stationery', availability: 'in-stock', tags: [], unit: '1 pc' }
+        },
+        {
+          productId: 'st3',
+          quantity: 1,
+          qty: 1,
+          product: { id: 'st3', name: 'Highlighters Set 4pcs', price: 80, image: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=400', category: 'Stationery', availability: 'in-stock', tags: [], unit: '4 pcs' }
+        },
+        {
+          productId: 'e1',
+          quantity: 1,
+          qty: 1,
+          product: { id: 'e1', name: 'First Aid Kit Basic', price: 250, image: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=400', category: 'Emergency', availability: 'in-stock', tags: ['emergency', 'parent-approved'], unit: '1 kit' }
+        }
+      ]
+    },
+    {
+      id: 'ORD-2026-8805',
+      studentName: 'Aarav Mehta',
+      studentId: 'CK2026001',
+      city: 'Hyderabad',
+      institution: 'Sri Chaitanya & Narayana Junior Academy',
+      hostel: 'B-Block Hostel',
+      createdAt: new Date(Date.now() - 120 * 60 * 1000).toISOString(),
+      status: 'collected',
+      total: 125,
+      paymentMethod: 'wallet',
+      paymentStatus: 'paid',
+      pickupCode: '992811',
+      deliverySlot: 'Kiosk Terminal #1 (Collected)',
+      items: [
+        {
+          productId: 'c2',
+          quantity: 2,
+          qty: 2,
+          product: { id: 'c2', name: 'KitKat 4 Finger', price: 30, image: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400', category: 'Chocolates', availability: 'in-stock', tags: [], unit: '38g' }
+        },
+        {
+          productId: 's4',
+          quantity: 1,
+          qty: 1,
+          product: { id: 's4', name: 'Roasted Makhana', price: 65, image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=400', category: 'Snacks & Namkeen', availability: 'limited', tags: ['healthy', 'parent-approved'], unit: '100g' }
+        }
+      ]
+    }
+  ];
+};
+
 export const inr = (n: number) =>
   `₹${Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 
@@ -397,7 +560,7 @@ export const useStore = create<AppStore>()(
           parentScreen: 'dashboard',
           linkedStudentId: 'CK-2026-101',
           walletBalance: 2500,
-          orders: [],
+          orders: isTestEnv ? [] : getInitialOrders(),
           walletTransactions: [makeWalletTransaction('top-up', 2500, 'Opening demo wallet allocation')]
         });
         get().showToast('Ecosystem Reset', 'Seeded demo state restored across all 4 applications.', 'success');
@@ -1086,7 +1249,7 @@ export const useStore = create<AppStore>()(
       walletTransactions: [makeWalletTransaction('top-up', 2500, 'Opening demo wallet allocation')],
       parentLimits: defaultLimits,
       student: defaultStudentProfile,
-      orders: [],
+      orders: getInitialOrders(),
       selectedCampus: 'Hyderabad',
       selectedInstitution: 'Sri Chaitanya & Narayana Junior Academy',
       selectedHostel: 'B-Block Hostel',
@@ -1129,7 +1292,7 @@ export const useStore = create<AppStore>()(
           selectedInstitution: defaultStudentProfile.institution,
           selectedHostel: defaultStudentProfile.hostel,
           cart: [],
-          orders: [],
+          orders: isTestEnv ? [] : getInitialOrders(),
           walletBalance: 2500,
           walletTransactions: [makeWalletTransaction('top-up', 2500, 'Opening demo wallet allocation')],
           parentLimits: defaultLimits,

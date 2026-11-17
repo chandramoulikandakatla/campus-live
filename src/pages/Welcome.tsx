@@ -1,4 +1,4 @@
-import { ArrowRight, ShieldCheck, TimerReset, GraduationCap, Shield, PackageCheck, Building2 } from 'lucide-react';
+import { ArrowRight, ShieldCheck, TimerReset, GraduationCap, Shield, PackageCheck, Building2, Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,29 +42,35 @@ export default function Welcome() {
             </div>
 
             {/* Feature Pills */}
-            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
+            <div className="mt-12 grid grid-cols-2 sm:grid-cols-5 gap-2.5 border-t border-border pt-6 text-xs text-muted-foreground">
               <Link to="/home" className="p-3 rounded-xl border border-border/60 bg-card/60 hover:border-primary/40 transition">
                 <GraduationCap className="w-4 h-4 text-primary mb-1" />
-                <p className="font-semibold text-foreground">Student Kiosk</p>
-                <p className="text-[11px] text-muted-foreground">Touch-ready shop</p>
+                <p className="font-semibold text-foreground">Student</p>
+                <p className="text-[10px] text-muted-foreground">Touch-ready shop</p>
               </Link>
 
               <Link to="/parent" className="p-3 rounded-xl border border-border/60 bg-card/60 hover:border-primary/40 transition">
                 <Shield className="w-4 h-4 text-emerald-500 mb-1" />
-                <p className="font-semibold text-foreground">Parent Portal</p>
-                <p className="text-[11px] text-muted-foreground">Allowance controls</p>
+                <p className="font-semibold text-foreground">Parent</p>
+                <p className="text-[10px] text-muted-foreground">Allowance</p>
               </Link>
 
               <Link to="/operations" className="p-3 rounded-xl border border-border/60 bg-card/60 hover:border-primary/40 transition">
                 <PackageCheck className="w-4 h-4 text-amber-500 mb-1" />
                 <p className="font-semibold text-foreground">Operations</p>
-                <p className="text-[11px] text-muted-foreground">OTP fulfillment</p>
+                <p className="text-[10px] text-muted-foreground">Fulfillment</p>
+              </Link>
+
+              <Link to="/rider" className="p-3 rounded-xl border border-border/60 bg-card/60 hover:border-primary/40 transition">
+                <Truck className="w-4 h-4 text-blue-500 mb-1" />
+                <p className="font-semibold text-foreground">Logistics</p>
+                <p className="text-[10px] text-muted-foreground">EV routing</p>
               </Link>
 
               <Link to="/college" className="p-3 rounded-xl border border-border/60 bg-card/60 hover:border-primary/40 transition">
                 <Building2 className="w-4 h-4 text-indigo-400 mb-1" />
-                <p className="font-semibold text-foreground">College Admin</p>
-                <p className="text-[11px] text-muted-foreground">Aggregated metrics</p>
+                <p className="font-semibold text-foreground">College</p>
+                <p className="text-[10px] text-muted-foreground">Analytics</p>
               </Link>
             </div>
           </div>

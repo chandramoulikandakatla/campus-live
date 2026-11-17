@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Package, Clock, CheckCircle2, Truck, UserCheck, ChevronRight, XCircle, Download } from 'lucide-react';
+import { Package, Clock, CheckCircle2, Truck, UserCheck, ChevronRight, XCircle, Download, Navigation } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -242,6 +242,45 @@ export default function Orders() {
                   <Download className="mr-2 h-4 w-4" /> Download demo receipt
                 </Button>
               </div>
+
+              {/* Live Transit & EV Shuttle Tracking Banner */}
+              {['packed', 'on-the-way'].includes(selectedOrder.status) && (
+                <div className="mt-5 rounded-2xl border border-blue-500/30 bg-blue-500/5 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400">
+                        <Truck className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-foreground">Campus EV Shuttle #04 in Transit</p>
+                        <p className="text-[11px] text-muted-foreground">Driver: Ramesh Kumar · Contact: +91 98480 22334</p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="border-blue-500/40 text-blue-600 dark:text-blue-400 bg-blue-500/10 text-[10px] font-bold animate-pulse">
+                      Live Telematics
+                    </Badge>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[11px] text-muted-foreground">
+                      <span>Departed Central Depot</span>
+                      <span className="font-semibold text-primary">ETA: ~4 mins (Hostel B Lobby)</span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-blue-500 to-primary rounded-full w-2/3 animate-pulse" />
+                    </div>
+                  </div>
+
+                  <Link
+                    to="/rider"
+                    className="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-colors"
+                  >
+                    <Navigation className="w-3.5 h-3.5" />
+                    Open Live Campus Route Map & Telematics →
+                  </Link>
+                </div>
+              )}
 
               {['placed', 'packed', 'on-the-way'].includes(selectedOrder.status) && (
                 <div className="mt-5 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-center">

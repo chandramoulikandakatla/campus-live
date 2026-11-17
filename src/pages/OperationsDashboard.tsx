@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   CheckCircle2,
   Package,
@@ -11,7 +12,8 @@ import {
   Sparkles,
   SlidersHorizontal,
   Search,
-  DollarSign
+  DollarSign,
+  Truck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
@@ -147,7 +149,7 @@ export default function OperationsDashboard() {
               Live order fulfillment, real-time catalog stock control, and audited manual adjustments.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant={activeTab === 'orders' ? 'default' : 'outline'}
               size="sm"
@@ -169,6 +171,12 @@ export default function OperationsDashboard() {
             >
               Wallet Audit
             </Button>
+            <Link to="/rider">
+              <Button variant="outline" size="sm" className="border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5 hover:bg-blue-500/10">
+                <Truck className="w-3.5 h-3.5 mr-1" />
+                Fleet Logistics
+              </Button>
+            </Link>
           </div>
         </div>
 

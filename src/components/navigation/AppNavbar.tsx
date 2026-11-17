@@ -15,7 +15,8 @@ import {
   SlidersHorizontal,
   ClipboardList,
   Store,
-  Home
+  Home,
+  Truck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,13 +38,15 @@ export function AppNavbar() {
 
   const pendingApprovalsCount = orders.filter((o) => o.status === 'pending-approval').length;
   const activeOpsCount = orders.filter((o) => o.status !== 'collected' && o.status !== 'cancelled').length;
+  const activeDeliveriesCount = orders.filter((o) => o.status === 'packed' || o.status === 'on-the-way').length;
 
   // Determine current portal
   const path = location.pathname;
   const isParent = path.startsWith('/parent');
   const isOps = path.startsWith('/operations');
+  const isDelivery = path.startsWith('/rider') || path.startsWith('/delivery') || path.startsWith('/logistics');
   const isCollege = path.startsWith('/college');
-  const isStudent = !isParent && !isOps && !isCollege;
+  const isStudent = !isParent && !isOps && !isCollege && !isDelivery;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-xl transition-colors duration-200">
@@ -103,6 +106,23 @@ export function AppNavbar() {
               {activeOpsCount > 0 && (
                 <span className="px-1.5 py-0.2 rounded-full bg-primary/20 text-primary text-[10px] font-bold">
                   {activeOpsCount}
+                </span>
+              )}
+            </Link>
+
+            <Link
+              to="/rider"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all ${
+                isDelivery
+                  ? 'bg-card text-foreground shadow-sm font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <span>Logistics</span>
+              {activeDeliveriesCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 text-[10px] font-bold">
+                  {activeDeliveriesCount}
                 </span>
               )}
             </Link>
@@ -273,9 +293,18 @@ export function AppNavbar() {
                 <PackageCheck className="w-4 h-4" /> Operations
               </Link>
               <Link
-                to="/college"
+                to="/rider"
                 onClick={() => setMobileOpen(false)}
                 className={`p-2.5 rounded-xl border flex items-center gap-2 ${
+                  isDelivery ? 'border-primary/40 bg-primary/10 font-bold text-primary' : 'border-border'
+                }`}
+              >
+                <Truck className="w-4 h-4" /> Logistics Hub
+              </Link>
+              <Link
+                to="/college"
+                onClick={() => setMobileOpen(false)}
+                className={`p-2.5 rounded-xl border flex items-center gap-2 col-span-2 ${
                   isCollege ? 'border-primary/40 bg-primary/10 font-bold text-primary' : 'border-border'
                 }`}
               >
