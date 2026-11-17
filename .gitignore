@@ -32,4 +32,5 @@ dist-ssr
 # Agent Documentation & Context
 docs/
 AGENTS.md
+reference.tsx
 
