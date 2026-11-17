@@ -1,30 +1,111 @@
-import { ArrowRight, ShieldCheck, TimerReset } from 'lucide-react';
+import { ArrowRight, ShieldCheck, TimerReset, GraduationCap, Shield, PackageCheck, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { AppNavbar } from '@/components/navigation/AppNavbar';
 import freshImage from '@/assets/cat-fresh.jpg';
 import snacksImage from '@/assets/cat-snacks.jpg';
 
 export default function Welcome() {
   return (
-    <main className="min-h-screen bg-background px-6 py-8 sm:px-10 lg:px-16">
-      <header className="mx-auto flex w-full max-w-7xl items-center justify-between">
-        <Link to="/" className="flex min-h-12 items-center gap-3" aria-label="CampusKart home">
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary font-display text-xl font-semibold text-primary-foreground">C</span>
-          <span className="font-display text-xl font-semibold">CampusKart</span>
-        </Link>
-        <Link to="/login"><Button variant="outline" size="lg">Student sign in</Button></Link>
-      </header>
-      <section className="mx-auto grid min-h-[76vh] w-full max-w-7xl items-center gap-12 py-12 lg:grid-cols-[1.02fr_0.98fr]">
-        <div className="max-w-2xl">
-          <p className="mb-6 flex items-center gap-2 text-sm font-medium text-muted-foreground"><span className="h-2 w-2 rounded-full bg-[hsl(var(--in-stock))]" /> CAMPUS PICKUP · STUDENT ACCESS</p>
-          <h1 className="font-display text-5xl font-semibold leading-[1.05] sm:text-6xl lg:text-7xl">Essentials,<br />right when<br />you need them.</h1>
-          <p className="mt-7 max-w-lg text-lg leading-relaxed text-muted-foreground">A dependable campus shop for everyday essentials, with your spending and balance always in view.</p>
-          <div className="mt-9 flex flex-wrap gap-4"><Link to="/login"><Button size="xl">Start shopping <ArrowRight /></Button></Link><div className="flex items-center gap-2 px-3 text-sm text-muted-foreground"><ShieldCheck className="h-5 w-5" /> Student-only access</div></div>
-          <div className="mt-14 flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6 text-sm text-muted-foreground"><span className="flex items-center gap-2"><TimerReset className="h-4 w-4" /> Campus-ready essentials</span><span>Wallet checkout</span><span>Live stock</span></div>
-        </div>
-        <div className="grid grid-cols-[1.1fr_0.9fr] items-center gap-4 sm:gap-6"><img src={freshImage} alt="Fresh produce available at CampusKart" className="aspect-[4/5] w-full rounded-sm object-cover" /><div className="space-y-4 sm:space-y-6"><img src={snacksImage} alt="Campus snacks available at CampusKart" className="aspect-square w-full rounded-sm object-cover" /><p className="max-w-xs text-sm leading-relaxed text-muted-foreground">Thoughtfully stocked for the little things that make campus life easier.</p></div></div>
-      </section>
-      <p className="mx-auto max-w-7xl border-t border-border pt-5 text-xs text-muted-foreground">CampusKart · Your campus essentials, in one place.</p>
-    </main>
+    <div className="min-h-screen bg-background text-foreground flex flex-col transition-colors duration-200">
+      <AppNavbar />
+
+      <main className="flex-1 mx-auto w-full max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+        <section className="grid min-h-[72vh] w-full items-center gap-12 py-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="max-w-2xl">
+            <div className="mb-6 flex flex-wrap items-center gap-2">
+              <Badge variant="verified">Smart Campus Commerce</Badge>
+              <Badge variant="secondary">FERPA & Guardian Aligned</Badge>
+            </div>
+
+            <h1 className="font-display text-4xl font-extrabold leading-[1.08] sm:text-5xl lg:text-6xl tracking-tight">
+              Campus essentials,<br />
+              <span className="text-primary">right when you need them.</span>
+            </h1>
+
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
+              A dependable, touch-optimized campus retail ecosystem with parent spending safeguards, real-time kiosk inventory, and touchless OTP pickup.
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link to="/home">
+                <Button size="lg" className="rounded-xl px-6">
+                  Start Student Shopping <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link to="/parent">
+                <Button variant="outline" size="lg" className="rounded-xl px-6">
+                  Parent Oversight <Shield className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Feature Pills */}
+            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
+              <Link to="/home" className="p-3 rounded-xl border border-border/60 bg-card/60 hover:border-primary/40 transition">
+                <GraduationCap className="w-4 h-4 text-primary mb-1" />
+                <p className="font-semibold text-foreground">Student Kiosk</p>
+                <p className="text-[11px] text-muted-foreground">Touch-ready shop</p>
+              </Link>
+
+              <Link to="/parent" className="p-3 rounded-xl border border-border/60 bg-card/60 hover:border-primary/40 transition">
+                <Shield className="w-4 h-4 text-emerald-500 mb-1" />
+                <p className="font-semibold text-foreground">Parent Portal</p>
+                <p className="text-[11px] text-muted-foreground">Allowance controls</p>
+              </Link>
+
+              <Link to="/operations" className="p-3 rounded-xl border border-border/60 bg-card/60 hover:border-primary/40 transition">
+                <PackageCheck className="w-4 h-4 text-amber-500 mb-1" />
+                <p className="font-semibold text-foreground">Operations</p>
+                <p className="text-[11px] text-muted-foreground">OTP fulfillment</p>
+              </Link>
+
+              <Link to="/college" className="p-3 rounded-xl border border-border/60 bg-card/60 hover:border-primary/40 transition">
+                <Building2 className="w-4 h-4 text-indigo-400 mb-1" />
+                <p className="font-semibold text-foreground">College Admin</p>
+                <p className="text-[11px] text-muted-foreground">Aggregated metrics</p>
+              </Link>
+            </div>
+          </div>
+
+          {/* Visual Showcase */}
+          <div className="grid grid-cols-[1.05fr_0.95fr] items-center gap-4 sm:gap-6">
+            <div className="overflow-hidden rounded-2xl border border-border shadow-md">
+              <img
+                src={freshImage}
+                alt="Fresh produce available at CampusKart"
+                className="aspect-[4/5] w-full object-cover transition-transform duration-500 hover:scale-105"
+              />
+            </div>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="overflow-hidden rounded-2xl border border-border shadow-md">
+                <img
+                  src={snacksImage}
+                  alt="Campus snacks available at CampusKart"
+                  className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-105"
+                />
+              </div>
+              <div className="p-4 rounded-2xl border border-border/60 bg-muted/40">
+                <p className="text-xs font-semibold text-foreground">Campus Pilot Operational</p>
+                <p className="text-xs leading-relaxed text-muted-foreground mt-0.5">
+                  Fulfilled within lunch and evening dispersal windows with 98.4% efficiency.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer className="mt-8 border-t border-border pt-6 text-xs text-muted-foreground flex flex-wrap items-center justify-between gap-2">
+          <p>CampusKart · Production-Grade Campus Commerce Ecosystem</p>
+          <div className="flex gap-4">
+            <Link to="/parent" className="hover:text-foreground">Parent Access</Link>
+            <Link to="/operations" className="hover:text-foreground">Kiosk Operator</Link>
+            <Link to="/college" className="hover:text-foreground">Institutional</Link>
+            <Link to="/ecosystem" className="text-primary font-medium hover:underline">Simulator</Link>
+          </div>
+        </footer>
+      </main>
+    </div>
   );
 }

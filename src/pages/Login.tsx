@@ -4,6 +4,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AppNavbar } from '@/components/navigation/AppNavbar';
 import { useAuth } from '@/lib/auth';
 import { useStore } from '@/lib/store';
 
@@ -44,7 +45,9 @@ export default function Login() {
   };
 
   return (
-    <main className="min-h-screen bg-background px-6 py-8 sm:px-10">
+    <div className="min-h-screen bg-background text-foreground flex flex-col transition-colors duration-200">
+      <AppNavbar />
+      <main className="flex-1 px-6 py-8 sm:px-10">
       <div className="mx-auto w-full max-w-6xl">
         <Link to="/" className="inline-flex min-h-12 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Back to CampusKart</Link>
         <div className="mx-auto grid max-w-4xl gap-12 py-12 md:grid-cols-[0.9fr_1.1fr] md:py-24">
@@ -63,5 +66,6 @@ export default function Login() {
         </div>
       </div>
     </main>
+    </div>
   );
 }

@@ -316,12 +316,23 @@ export default function ParentDashboard() {
                         outerRadius={80}
                         innerRadius={50}
                         paddingAngle={4}
+                        stroke="transparent"
                       >
                         {categoryChartData.map((_, index) => (
                           <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value: number) => money(value)} />
+                      <Tooltip
+                        formatter={(value: number) => money(value)}
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--card))',
+                          borderColor: 'hsl(var(--border))',
+                          borderRadius: '0.75rem',
+                          color: 'hsl(var(--foreground))',
+                          fontSize: '12px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>

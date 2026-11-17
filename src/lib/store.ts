@@ -1381,18 +1381,18 @@ export function useProducts() {
 }
 
 export const categories = [
-  { id: 'fruits-fresh', name: 'Fruits & Fresh', icon: '🍎', color: 'bg-emerald-100' },
-  { id: 'biscuits-cookies', name: 'Biscuits & Cookies', icon: '🍪', color: 'bg-amber-100' },
-  { id: 'snacks-namkeen', name: 'Snacks & Namkeen', icon: '🍿', color: 'bg-orange-100' },
-  { id: 'chocolates', name: 'Chocolates', icon: '🍫', color: 'bg-yellow-100' },
-  { id: 'candies-treats', name: 'Candies & Treats', icon: '🍬', color: 'bg-pink-100' },
-  { id: 'bakery-rusks', name: 'Bakery & Rusks', icon: '🥐', color: 'bg-rose-100' },
-  { id: 'pickles-addons', name: 'Pickles & Add-ons', icon: '🥫', color: 'bg-lime-100' },
-  { id: 'beverages', name: 'Beverages', icon: '🥤', color: 'bg-blue-100' },
-  { id: 'coconut-water', name: 'Coconut Water', icon: '🥥', color: 'bg-teal-100' },
-  { id: 'hygiene-home', name: 'Hygiene & Home Care', icon: '🧴', color: 'bg-purple-100' },
-  { id: 'emergency', name: 'Emergency', icon: '🩹', color: 'bg-red-100' },
-  { id: 'stationery', name: 'Stationery', icon: '📝', color: 'bg-cyan-100' },
+  { id: 'fruits-fresh', name: 'Fruits & Fresh', icon: '🍎', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 dark:bg-emerald-500/15' },
+  { id: 'biscuits-cookies', name: 'Biscuits & Cookies', icon: '🍪', color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 dark:bg-amber-500/15' },
+  { id: 'snacks-namkeen', name: 'Snacks & Namkeen', icon: '🍿', color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 dark:bg-orange-500/15' },
+  { id: 'chocolates', name: 'Chocolates', icon: '🍫', color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 dark:bg-yellow-500/15' },
+  { id: 'candies-treats', name: 'Candies & Treats', icon: '🍬', color: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 dark:bg-pink-500/15' },
+  { id: 'bakery-rusks', name: 'Bakery & Rusks', icon: '🥐', color: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 dark:bg-rose-500/15' },
+  { id: 'pickles-addons', name: 'Pickles & Add-ons', icon: '🥫', color: 'bg-lime-500/10 text-lime-600 dark:text-lime-400 dark:bg-lime-500/15' },
+  { id: 'beverages', name: 'Beverages', icon: '🥤', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 dark:bg-blue-500/15' },
+  { id: 'coconut-water', name: 'Coconut Water', icon: '🥥', color: 'bg-teal-500/10 text-teal-600 dark:text-teal-400 dark:bg-teal-500/15' },
+  { id: 'hygiene-home', name: 'Hygiene & Home Care', icon: '🧴', color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 dark:bg-purple-500/15' },
+  { id: 'emergency', name: 'Emergency', icon: '🩹', color: 'bg-red-500/10 text-red-600 dark:text-red-400 dark:bg-red-500/15' },
+  { id: 'stationery', name: 'Stationery', icon: '📝', color: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 dark:bg-cyan-500/15' },
 ];
 
 export const cities = [
