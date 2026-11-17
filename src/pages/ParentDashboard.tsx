@@ -125,9 +125,9 @@ export default function ParentDashboard() {
     );
   };
 
-  const downloadStatement = () => {
+  const downloadStatement = async () => {
     try {
-      downloadParentStatementPdf(student, walletBalance, parentLimits, walletTransactions, orders);
+      await downloadParentStatementPdf(student, walletBalance, parentLimits, walletTransactions, orders);
       toast.success(`Official guardian audit statement downloaded for ${student.fullName}`);
     } catch {
       toast.error('Could not generate PDF statement.');

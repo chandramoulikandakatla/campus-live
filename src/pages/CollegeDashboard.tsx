@@ -19,9 +19,9 @@ export default function CollegeDashboard() {
     activeOrders.forEach((order) => order.items.forEach((item) => totals.set(item.product.category, (totals.get(item.product.category) ?? 0) + item.product.price * item.quantity)));
     return [...totals.entries()].sort((a, b) => b[1] - a[1]);
   }, [activeOrders]);
-  const exportReport = () => {
+  const exportReport = async () => {
     try {
-      downloadCollegeReportPdf(student.institution, student.city, activeOrders, gross);
+      await downloadCollegeReportPdf(student.institution, student.city, activeOrders, gross);
       toast.success('Aggregated campus PDF report downloaded.');
     } catch {
       toast.error('Could not generate PDF report.');

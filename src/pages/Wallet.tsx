@@ -19,9 +19,9 @@ export default function Wallet() {
     [walletTransactions]
   );
 
-  const downloadLedger = () => {
+  const downloadLedger = async () => {
     try {
-      downloadWalletStatementPdf(student, walletBalance, parentLimits, activity);
+      await downloadWalletStatementPdf(student, walletBalance, parentLimits, activity);
       toast.success(`Official PDF wallet statement downloaded for ${student.fullName}`);
     } catch {
       toast.error('Could not generate PDF statement.');

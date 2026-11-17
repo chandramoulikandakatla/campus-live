@@ -34,10 +34,10 @@ export default function Orders() {
   );
   const selectedOrder = sortedOrders.find((order) => order.id === selectedOrderId) ?? sortedOrders[0] ?? null;
 
-  const downloadReceipt = (order: typeof selectedOrder) => {
+  const downloadReceipt = async (order: typeof selectedOrder) => {
     if (!order) return;
     try {
-      downloadOrderReceiptPdf(order);
+      await downloadOrderReceiptPdf(order);
       toast.success(`Official PDF receipt downloaded for ${order.id}`);
     } catch {
       toast.error('Could not generate receipt PDF.');

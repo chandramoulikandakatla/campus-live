@@ -10,7 +10,7 @@ export default function Home() {
   const { data: profile } = useProfile();
   const navigate = useNavigate();
   const categories = [...new Set(products.map((product) => product.category))];
-  const featured = products.filter((product) => (product.stockQuantity ?? 25) > 0).slice(0, 4);
+  const featured = products.filter((product) => (product.stockQuantity ?? 25) > 0).slice(0, 6);
 
   return (
     <div className="mx-auto w-full max-w-[1600px] px-5 py-8 pb-28 sm:px-8 lg:px-10 lg:py-12">
@@ -98,7 +98,7 @@ export default function Home() {
         ) : featured.length === 0 ? (
           <p className="py-8 text-muted-foreground">No items are available at the moment.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3.5 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {featured.map((product) => (
               <ProductTile key={product.id} product={product} />
             ))}
