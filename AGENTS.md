@@ -1,3 +1,26 @@
-# Project Rules
+# Project Rules & Agent Instructions
 
-- Keep public welcome and login screens separate from authenticated kiosk screens, with protected kiosk routes sharing the kiosk navigation shell, so sign-in state and the student journey stay consistent.
+- **Public vs Authenticated Route Boundary**: Keep public welcome (`/`) and login (`/login`) screens separate from authenticated kiosk screens (`/home`, `/shop`, `/cart`, `/orders`, `/wallet`). All authenticated student/kiosk screens must be wrapped in `RequireAuth` and share the unified `KioskShell` navigation.
+- **Single Source of Truth (No Dual Stores)**: Never create parallel or duplicate state management stores. All shared state (cart, products, orders, wallet, parent limits, profile) must live in `src/lib/store.ts`. Secondary store wrappers like `cart.ts`, `catalog.ts`, `orders.ts` are forbidden.
+- **Parent Spending Policy Invariants**:
+  - Daily and monthly spend limits must strictly gate order checkout.
+  - Category restrictions (whitelists) must prevent prohibited items from checkout.
+  - Time-of-day restrictions must require parent approval if ordered outside allowed hours.
+  - Any order exceeding `parentLimits.approvalAbove` must be placed in `pending-approval` status without debiting the wallet until approved.
+- **Atomic Wallet Ledger**:
+  - Wallet balance must never be arbitrarily modified without an accompanying `WalletTransaction` record.
+  - Transactions must have a clear `type` (`top-up`, `purchase`, `refund`), `amount`, `orderId`, and timestamp.
+- **Campus Privacy Boundary**:
+  - The College Admin dashboard (`/college`) must only surface anonymized, aggregate metrics (order volume, category distribution, total GMV). It must NEVER expose student names, individual IDs, or specific itemized student purchase histories.
+- **Kiosk-Optimized UX**:
+  - Touch targets on kiosk and student interfaces must meet a minimum size of 44x44px (with 56px preferred for primary actions).
+  - Visual hierarchy must prioritize clarity, stock state, and balance visibility.
+- **Mandatory Task Log Maintenance**:
+  - Every batch of feature additions, bug fixes, or architectural updates MUST be documented in `docs/TASK_LOGS.md`.
+  - Maintain a clear timestamped log containing a brief summary of completed tasks, changed file structures, and verification results.
+- **Campus Logistics & Transportation Invariants**:
+  - Campus delivery routes must simulate realistic campus transit waypoints (Central Depot ➔ Boulevards ➔ Academic Blocks ➔ Hostels).
+  - Telematics (speed limit 20 km/h, battery %, cargo temperature, zero-emission tracking) must be reflected across rider and student views.
+  - Final delivery handover must strictly require 6-digit OTP verification or physical smart locker solenoid release before marking orders `collected`.
+- **Parallel Documentation & Addons Synchronization**:
+  - When new hardware, external APIs, or software addons (payment gateways, EV logistics, IoT lockers, SMS/WhatsApp webhooks) are conceived or implemented, both `docs/ADDONS.md` and `docs/RECOMMENDATIONS.md` must be updated concurrently.
