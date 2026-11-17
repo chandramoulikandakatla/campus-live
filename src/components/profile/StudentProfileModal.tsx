@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { useStore, inr } from '@/lib/store';
 import { useAuth, useProfile } from '@/lib/auth';
 import { toast } from 'sonner';
+import logoIcon from '@/assets/campuskart-icon.jpg';
 
 interface Props {
   isOpen: boolean;
@@ -132,9 +133,12 @@ export function StudentProfileModal({ isOpen, onClose }: Props) {
             <div className="space-y-4">
               <div className="p-5 rounded-2xl border border-border bg-card space-y-4 shadow-xs">
                 <div className="flex justify-between items-center text-xs border-b border-border pb-3">
-                  <span className="font-display font-bold text-foreground uppercase tracking-wider text-[11px]">
-                    University Campus Pass
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <img src={logoIcon} alt="CampusKart Logo" className="h-5 w-5 rounded-md object-cover" />
+                    <span className="font-display font-bold text-foreground uppercase tracking-wider text-[11px]">
+                      University Campus Pass
+                    </span>
+                  </div>
                   <span className="font-mono text-[10px] text-muted-foreground">VALID: 2026–2027</span>
                 </div>
 

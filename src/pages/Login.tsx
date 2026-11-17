@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { AppNavbar } from '@/components/navigation/AppNavbar';
 import { useAuth } from '@/lib/auth';
 import { useStore } from '@/lib/store';
+import logoIcon from '@/assets/campuskart-icon.jpg';
 
 export default function Login() {
   const { signIn, signUp, session } = useAuth();
@@ -95,13 +96,18 @@ export default function Login() {
 
           {/* Sign In / Sign Up Card */}
           <div className="p-6 sm:p-8 rounded-2xl border border-border bg-card shadow-sm space-y-6">
-            <div className="space-y-1">
-              <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
-                Student Kiosk Sign In
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Enter your 6-digit campus PIN or student credentials.
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 overflow-hidden rounded-xl border border-border shadow-xs bg-zinc-950 shrink-0">
+                <img src={logoIcon} alt="CampusKart Logo" className="h-full w-full object-cover" />
+              </div>
+              <div className="space-y-0.5">
+                <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
+                  Student Kiosk Sign In
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  Enter your 6-digit campus PIN or student credentials.
+                </p>
+              </div>
             </div>
 
             <div className="flex border-b border-border">

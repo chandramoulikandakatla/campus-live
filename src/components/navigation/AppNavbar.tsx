@@ -20,6 +20,7 @@ import { useStore, inr } from '@/lib/store';
 import { useProfile } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 import { StudentProfileModal } from '@/components/profile/StudentProfileModal';
+import logoIcon from '@/assets/campuskart-icon.jpg';
 
 export function AppNavbar() {
   const location = useLocation();
@@ -60,8 +61,8 @@ export function AppNavbar() {
         {/* Left: Brand Identity */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 font-display text-sm font-bold tracking-tight shadow-sm transition-transform group-hover:scale-105">
-              CK
+            <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-xs transition-transform group-hover:scale-105 shrink-0 bg-zinc-950">
+              <img src={logoIcon} alt="CampusKart Logo" className="h-full w-full object-cover" />
             </div>
             <div className="flex flex-col">
               <span className="font-display text-base font-bold tracking-tight leading-tight text-foreground">

@@ -5,6 +5,7 @@ import { useProfile } from '@/lib/auth';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Wallet, Shield, ArrowLeft } from 'lucide-react';
+import logoIcon from '@/assets/campuskart-icon.jpg';
 
 export default function StudentProfilePage() {
   const student = useStore((s) => s.student);
@@ -60,9 +61,12 @@ export default function StudentProfilePage() {
           {/* Digital Pass Details */}
           <div className="p-5 rounded-xl border border-border bg-muted/30 space-y-4">
             <div className="flex justify-between items-center text-xs border-b border-border pb-2.5">
-              <span className="font-display font-bold text-foreground uppercase tracking-wider text-[11px]">
-                University Smart Pass
-              </span>
+              <div className="flex items-center gap-2">
+                <img src={logoIcon} alt="CampusKart Logo" className="h-5 w-5 rounded-md object-cover" />
+                <span className="font-display font-bold text-foreground uppercase tracking-wider text-[11px]">
+                  University Smart Pass
+                </span>
+              </div>
               <span className="font-mono text-[10px] text-muted-foreground">VALID: 2026–2027</span>
             </div>
 

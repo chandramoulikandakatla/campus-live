@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { AppNavbar } from '@/components/navigation/AppNavbar';
 import freshImage from '@/assets/cat-fresh.jpg';
 import snacksImage from '@/assets/cat-snacks.jpg';
+import logoIcon from '@/assets/campuskart-icon.jpg';
+import brandLogo from '@/assets/campuskart-logo.jpg';
 
 export default function Welcome() {
   const portals = [
@@ -58,9 +60,14 @@ export default function Welcome() {
         {/* Hero Section */}
         <section className="grid min-h-[64vh] w-full items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 bg-muted/40 text-xs font-semibold text-muted-foreground">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              Pilot Live: Sri Chaitanya & Narayana Junior Academy
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 overflow-hidden rounded-xl border border-border shadow-xs bg-zinc-950 shrink-0">
+                <img src={logoIcon} alt="CampusKart Icon" className="h-full w-full object-cover" />
+              </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 bg-muted/40 text-xs font-semibold text-muted-foreground">
+                <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                Pilot Live: Sri Chaitanya & Narayana Junior Academy
+              </div>
             </div>
 
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08]">
