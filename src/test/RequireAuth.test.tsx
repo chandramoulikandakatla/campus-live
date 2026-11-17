@@ -75,5 +75,16 @@ describe('RequireAuth - Public vs Authenticated Boundary', () => {
     expect(screen.getByText('Cart')).toBeInTheDocument();
     expect(screen.getByText('Orders')).toBeInTheDocument();
     expect(screen.getAllByText('Wallet').length).toBeGreaterThanOrEqual(1);
+
+    // When signed in, wallet balance amount is visible in the top navbar
+    expect(screen.getByTitle('Student Wallet Balance')).toBeInTheDocument();
+  });
+
+  it('hides wallet amount and shows Sign In button when student is signed out', () => {
+    // Unauthenticated state: localStorage is clean
+    renderWithProviders('/login');
+
+    // Wallet amount pill should NOT be rendered in navbar
+    expect(screen.queryByTitle('Student Wallet Balance')).not.toBeInTheDocument();
   });
 });

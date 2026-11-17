@@ -17,15 +17,17 @@ import {
 } from 'lucide-react';
 import { CampusSelector } from '@/components/CampusSelector';
 import { useStore, inr } from '@/lib/store';
-import { useProfile } from '@/lib/auth';
+import { useAuth, useProfile } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 import { StudentProfileModal } from '@/components/profile/StudentProfileModal';
 import logoIcon from '@/assets/campuskart-icon.jpg';
 
 export function AppNavbar() {
   const location = useLocation();
+  const { session, user } = useAuth();
   const { data: profile } = useProfile();
   const { toggleTheme, isDark } = useTheme();
+  const isAuthenticated = !!(session && user);
   const cartCount = useStore((s) => s.getCartCount());
   const walletBalance = useStore((s) => s.walletBalance);
   const orders = useStore((s) => s.orders);
@@ -185,15 +187,17 @@ export function AppNavbar() {
             <CampusSelector />
           </div>
 
-          {/* Student Wallet Pill */}
-          <Link
-            to="/wallet"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-xs font-semibold text-foreground shadow-xs"
-            title="Student Wallet Balance"
-          >
-            <WalletIcon className="w-3.5 h-3.5 text-primary" />
-            <span className="font-mono">{inr(walletBalance)}</span>
-          </Link>
+          {/* Student Wallet Pill - Only visible when student is signed in */}
+          {isAuthenticated && (
+            <Link
+              to="/wallet"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-xs font-semibold text-foreground shadow-xs"
+              title="Student Wallet Balance"
+            >
+              <WalletIcon className="w-3.5 h-3.5 text-primary" />
+              <span className="font-mono">{inr(walletBalance)}</span>
+            </Link>
+          )}
 
           {/* Cart Icon */}
           <Link
@@ -224,19 +228,29 @@ export function AppNavbar() {
             )}
           </button>
 
-          {/* Student Profile & Digital Pass Button */}
-          <button
-            type="button"
-            onClick={() => setProfileModalOpen(true)}
-            aria-label="Student profile and digital ID pass"
-            className="flex h-9 items-center gap-2 px-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted transition-colors text-xs font-semibold shadow-xs"
-            title="Student Profile & ID Pass"
-          >
-            <div className="flex h-5 w-5 items-center justify-center rounded-md bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 font-bold text-[10px]">
-              {initials}
-            </div>
-            <span className="hidden sm:inline font-medium text-xs">{studentFirstName}</span>
-          </button>
+          {/* Student Profile (When signed in) OR Sign In Button (When signed out) */}
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={() => setProfileModalOpen(true)}
+              aria-label="Student profile and digital ID pass"
+              className="flex h-9 items-center gap-2 px-2.5 rounded-xl border border-border bg-card text-foreground hover:bg-muted transition-colors text-xs font-semibold shadow-xs"
+              title="Student Profile & ID Pass"
+            >
+              <div className="flex h-5 w-5 items-center justify-center rounded-md bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 font-bold text-[10px]">
+                {initials}
+              </div>
+              <span className="hidden sm:inline font-medium text-xs">{studentFirstName}</span>
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="flex h-9 items-center gap-1.5 px-3.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold shadow-xs transition-all active:scale-95"
+              title="Sign in to Student Kiosk"
+            >
+              Sign In
+            </Link>
+          )}
 
           {/* Mobile Menu Hamburger */}
           <button
@@ -405,10 +419,17 @@ export function AppNavbar() {
               <Link to="/track" onClick={() => setMobileOpen(false)} className="p-2 rounded-lg bg-muted/60">
                 Live Tracking
               </Link>
-              <Link to="/wallet" onClick={() => setMobileOpen(false)} className="p-2 rounded-lg bg-muted/60 flex items-center justify-between">
-                <span>Wallet</span>
-                <span className="text-[10px] font-mono text-muted-foreground">{inr(walletBalance)}</span>
-              </Link>
+              {isAuthenticated ? (
+                <Link to="/wallet" onClick={() => setMobileOpen(false)} className="p-2 rounded-lg bg-muted/60 flex items-center justify-between">
+                  <span>Wallet</span>
+                  <span className="text-[10px] font-mono text-muted-foreground">{inr(walletBalance)}</span>
+                </Link>
+              ) : (
+                <Link to="/login" onClick={() => setMobileOpen(false)} className="p-2 rounded-lg bg-muted/60 flex items-center justify-between">
+                  <span>Wallet</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">Sign in</span>
+                </Link>
+              )}
             </div>
           </div>
 
