@@ -1,4 +1,9 @@
 import { type Order, inr } from './store';
+export {
+  downloadWalletStatementPdf,
+  downloadParentStatementPdf,
+  downloadCollegeReportPdf
+} from './pdfStatements';
 
 /**
  * Escapes characters for PDF string literals: (, ), and \

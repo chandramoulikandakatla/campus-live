@@ -15,7 +15,8 @@ import {
   PieChart as PieChartIcon,
   BarChart3,
   AlertTriangle,
-  QrCode
+  QrCode,
+  FileText
 } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { toast } from 'sonner';
@@ -25,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Navbar } from '@/components/Navbar';
 import { categories, getSpentThisMonth, getSpentToday, useStore } from '@/lib/store';
+import { downloadParentStatementPdf } from '@/lib/pdfStatements';
 
 const money = (value: number) => `₹${value.toLocaleString('en-IN')}`;
 const CHART_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#f43f5e', '#84cc16'];
@@ -124,26 +126,12 @@ export default function ParentDashboard() {
   };
 
   const downloadStatement = () => {
-    const rows = [
-      ['CampusKart Parent Statement', student.fullName, student.studentId],
-      ['Statement Date', new Date().toLocaleString('en-IN')],
-      ['Current Wallet Balance', String(walletBalance)],
-      [],
-      ['Date', 'Description', 'Type', 'Amount (INR)'],
-      ...walletTransactions.map((tx) => [
-        new Date(tx.createdAt).toLocaleString('en-IN'),
-        tx.description,
-        tx.type,
-        String(tx.amount)
-      ])
-    ];
-    const csv = rows.map((r) => r.map((c) => `"${(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `campuskart-statement-${student.studentId}.csv`;
-    a.click();
-    toast.success('Official parent wallet statement downloaded.');
+    try {
+      downloadParentStatementPdf(student, walletBalance, parentLimits, walletTransactions, orders);
+      toast.success(`Official guardian audit statement downloaded for ${student.fullName}`);
+    } catch {
+      toast.error('Could not generate PDF statement.');
+    }
   };
 
   return (
@@ -198,7 +186,7 @@ export default function ParentDashboard() {
               size="sm"
               onClick={downloadStatement}
             >
-              <ArrowDownToLine className="w-4 h-4 mr-1" /> Export Statement
+              <FileText className="w-4 h-4 mr-1 text-emerald-500" /> Export Statement (PDF)
             </Button>
           </div>
         </div>

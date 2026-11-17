@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { ArrowDownToLine, Building2, ClipboardList, PackageCheck, TrendingUp } from 'lucide-react';
+import { Building2, ClipboardList, PackageCheck, TrendingUp, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { Navbar } from '@/components/Navbar';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/lib/store';
+import { downloadCollegeReportPdf } from '@/lib/pdfStatements';
 
 const money = (value: number) => `₹${value.toLocaleString('en-IN')}`;
 export default function CollegeDashboard() {
@@ -19,24 +20,14 @@ export default function CollegeDashboard() {
     return [...totals.entries()].sort((a, b) => b[1] - a[1]);
   }, [activeOrders]);
   const exportReport = () => {
-    const period = new Date().toLocaleString('en-IN', { month: 'long', year: 'numeric' });
-    const rows = [
-      ['CampusKart campus statement (illustrative demo)'],
-      ['Institution', student.institution],
-      ['City', student.city],
-      ['Reporting period', period],
-      ['Recorded order value (INR)', String(gross)],
-      ['Recorded orders', String(activeOrders.length)],
-      ['Collected orders', String(activeOrders.filter((order) => order.status === 'collected').length)],
-      [],
-      ['Category', 'Order value (INR)'],
-      ...categoryBreakdown.map(([name, amount]) => [name, String(amount)]),
-    ];
-    const csv = rows.map((row) => row.map((cell) => `"${(cell ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    const a = document.createElement('a'); a.href = url; a.download = 'campuskart-monthly-campus-statement-demo.csv'; a.click(); URL.revokeObjectURL(url); toast.success('Aggregated campus statement downloaded.');
+    try {
+      downloadCollegeReportPdf(student.institution, student.city, activeOrders, gross);
+      toast.success('Aggregated campus PDF report downloaded.');
+    } catch {
+      toast.error('Could not generate PDF report.');
+    }
   };
-  return <div className="min-h-screen bg-background"><Navbar /><main className="container mx-auto max-w-7xl px-4 py-8"><div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><Badge variant="secondary">Optional college portal</Badge><h1 className="mt-3 font-display text-3xl font-bold">Campus overview</h1><p className="mt-1 text-muted-foreground">Monthly campus-level commerce summary for {student.institution} · {student.city}. Student names and personal purchase profiles are not displayed.</p></div><Button variant="outline" onClick={exportReport}><ArrowDownToLine className="mr-2 h-4 w-4" /> Export activity report</Button></div>
+  return <div className="min-h-screen bg-background"><Navbar /><main className="container mx-auto max-w-7xl px-4 py-8"><div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><Badge variant="secondary">Optional college portal</Badge><h1 className="mt-3 font-display text-3xl font-bold">Campus overview</h1><p className="mt-1 text-muted-foreground">Monthly campus-level commerce summary for {student.institution} · {student.city}. Student names and personal purchase profiles are not displayed.</p></div><Button variant="outline" onClick={exportReport} className="rounded-xl font-semibold"><FileText className="mr-2 h-4 w-4 text-indigo-400" /> Export Activity Report (PDF)</Button></div>
     <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <Card className="p-5">
         <p className="text-sm text-muted-foreground">Order value (GMV)</p>

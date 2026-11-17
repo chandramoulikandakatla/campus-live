@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { ArrowDownToLine, ArrowUpRight, Clock3, ShieldCheck, Wallet as WalletIcon } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpRight, Clock3, ShieldCheck, Wallet as WalletIcon, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getSpentThisMonth, getSpentToday, useStore } from '@/lib/store';
+import { downloadWalletStatementPdf } from '@/lib/pdfStatements';
 
 const money = (value: number) => `₹${Math.abs(value).toLocaleString('en-IN')}`;
 
@@ -19,29 +20,12 @@ export default function Wallet() {
   );
 
   const downloadLedger = () => {
-    const rows = [
-      ['CampusKart demo wallet statement'],
-      ['Student', student.fullName],
-      ['Student ID', student.studentId],
-      ['Available balance (INR)', String(walletBalance)],
-      [],
-      ['Transaction ID', 'Date', 'Description', 'Type', 'Amount (INR)'],
-      ...activity.map((tx) => [
-        tx.id,
-        new Date(tx.createdAt).toLocaleString('en-IN'),
-        tx.description,
-        tx.type,
-        String(tx.amount),
-      ]),
-    ];
-    const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'campuskart-student-wallet-demo.csv';
-    anchor.click();
-    URL.revokeObjectURL(url);
-    toast.success('Demo wallet statement downloaded.');
+    try {
+      downloadWalletStatementPdf(student, walletBalance, parentLimits, activity);
+      toast.success(`Official PDF wallet statement downloaded for ${student.fullName}`);
+    } catch {
+      toast.error('Could not generate PDF statement.');
+    }
   };
 
   return (
@@ -54,8 +38,8 @@ export default function Wallet() {
             Your available balance, spending allowance and transaction ledger.
           </p>
         </div>
-        <Button variant="outline" onClick={downloadLedger}>
-          <ArrowDownToLine className="mr-2 h-4 w-4" /> Download statement
+        <Button variant="outline" onClick={downloadLedger} className="rounded-xl font-semibold">
+          <FileText className="mr-2 h-4 w-4 text-primary" /> Download Statement (PDF)
         </Button>
       </div>
 
