@@ -32,6 +32,50 @@ export function KioskShell({ children }: { children: ReactNode }) {
             </span>
           </Link>
 
+          {/* Quick Portal Switcher Pills */}
+          <div className="hidden xl:flex items-center gap-1 bg-muted/60 p-1 rounded-xl text-xs">
+            <Link
+              to="/home"
+              className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                location.pathname.startsWith('/home') || location.pathname.startsWith('/shop')
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Student
+            </Link>
+            <Link
+              to="/parent"
+              className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                location.pathname === '/parent'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Parent
+            </Link>
+            <Link
+              to="/operations"
+              className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                location.pathname === '/operations'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Operations
+            </Link>
+            <Link
+              to="/college"
+              className={`px-2.5 py-1 rounded-lg font-medium transition ${
+                location.pathname === '/college'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              College
+            </Link>
+          </div>
+
           <nav className="flex items-center gap-2 ml-auto">
             {NAV.map(({ to, label, icon: Icon }) => {
               const active = location.pathname === to;

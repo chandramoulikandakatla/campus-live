@@ -243,17 +243,40 @@ export default function Orders() {
                 </Button>
               </div>
 
-              {selectedOrder.status === 'on-the-way' && (
-                <div className="mt-5 rounded-xl bg-primary/5 p-4">
-                  <p className="flex items-center gap-2 text-sm font-semibold">
-                    <UserCheck className="h-4 w-4 text-primary" /> Campus pickup verification
+              {['placed', 'packed', 'on-the-way'].includes(selectedOrder.status) && (
+                <div className="mt-5 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-center">
+                  <p className="flex items-center justify-center gap-2 text-sm font-semibold text-primary">
+                    <UserCheck className="h-4 w-4" /> Kiosk Pickup Security Token
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Share this demo code with the operations desk when collecting:
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Present this 6-digit OTP or scan your token at the campus kiosk:
                   </p>
-                  <p className="mt-2 font-mono text-2xl font-bold tracking-[0.25em]">
+                  <div className="my-2 font-mono text-3xl font-extrabold tracking-[0.25em] text-foreground">
                     {selectedOrder.pickupCode}
-                  </p>
+                  </div>
+                  <div className="mx-auto my-3 flex h-24 w-24 items-center justify-center rounded-xl bg-white p-2 shadow-inner">
+                    <svg viewBox="0 0 100 100" className="h-full w-full">
+                      <rect width="100" height="100" fill="white" />
+                      <rect x="10" y="10" width="24" height="24" fill="#0f172a" />
+                      <rect x="14" y="14" width="16" height="16" fill="white" />
+                      <rect x="18" y="18" width="8" height="8" fill="#0f172a" />
+                      <rect x="66" y="10" width="24" height="24" fill="#0f172a" />
+                      <rect x="70" y="14" width="16" height="16" fill="white" />
+                      <rect x="74" y="18" width="8" height="8" fill="#0f172a" />
+                      <rect x="10" y="66" width="24" height="24" fill="#0f172a" />
+                      <rect x="14" y="70" width="16" height="16" fill="white" />
+                      <rect x="18" y="74" width="8" height="8" fill="#0f172a" />
+                      <rect x="42" y="14" width="8" height="16" fill="#0f172a" />
+                      <rect x="42" y="42" width="16" height="16" fill="#0f172a" />
+                      <rect x="66" y="42" width="10" height="8" fill="#0f172a" />
+                      <rect x="42" y="70" width="16" height="8" fill="#0f172a" />
+                      <rect x="66" y="66" width="24" height="24" fill="#0f172a" />
+                      <rect x="72" y="72" width="12" height="12" fill="white" />
+                    </svg>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-mono">
+                    Token: TOKEN-{selectedOrder.id}-{selectedOrder.pickupCode}
+                  </span>
                 </div>
               )}
 

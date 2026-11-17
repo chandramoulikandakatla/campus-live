@@ -20,7 +20,7 @@ export default function Cart() {
   const { cart, updateQuantity, removeFromCart, getCartTotal, clearCart, parentLimits, addOrder, student, selectedCampus, selectedInstitution, selectedHostel, walletBalance, orders } = useStore();
   const [selectedSlot, setSelectedSlot] = useState<string>('midday');
   const [note, setNote] = useState('');
-  const [confirmedOrder, setConfirmedOrder] = useState<{ id: string; slot: string; total: number; approval: boolean } | null>(null);
+  const [confirmedOrder, setConfirmedOrder] = useState<{ id: string; slot: string; total: number; approval: boolean; pickupCode?: string } | null>(null);
   const total = getCartTotal();
   const spentToday = getSpentToday(orders);
   const spentThisMonth = getSpentThisMonth(orders);
@@ -66,7 +66,7 @@ export default function Cart() {
       pickupCode,
       note: note.trim(),
     });
-    setConfirmedOrder({ id: orderId, slot: slot.time, total, approval: requiresApproval });
+    setConfirmedOrder({ id: orderId, slot: slot.time, total, approval: requiresApproval, pickupCode });
     clearCart();
     toast.success(requiresApproval ? 'Approval request sent to the parent demo portal.' : 'Order placed successfully.');
   };
@@ -102,6 +102,13 @@ export default function Cart() {
               <strong>Total</strong>
               <strong className="font-display text-xl">{money(confirmedOrder.total)}</strong>
             </div>
+            {!confirmedOrder.approval && confirmedOrder.pickupCode && (
+              <div className="mt-4 p-4 rounded-xl border border-primary/20 bg-primary/5 text-center">
+                <span className="text-xs uppercase font-mono tracking-widest text-primary font-bold">Kiosk Pickup OTP</span>
+                <div className="text-3xl font-mono font-black tracking-widest text-foreground my-1">{confirmedOrder.pickupCode}</div>
+                <p className="text-xs text-muted-foreground">Present this 6-digit code or scan the touchless QR token at the kiosk.</p>
+              </div>
+            )}
           </div>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link to="/orders" className="flex-1">
