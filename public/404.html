@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusKart — Redirecting...</title>
+    <script>
+      // Single Page App router redirect for GitHub Pages
+      const segmentCount = 1; // repository name segment in path: /campus-live/
+      const loc = window.location;
+      const pathParts = loc.pathname.split('/').filter(Boolean);
+      const repoName = pathParts[0] || '';
+      const subPath = pathParts.slice(segmentCount).join('/');
+      const targetHash = '#' + (subPath ? '/' + subPath : '/');
+      const targetUrl = loc.origin + (repoName ? '/' + repoName + '/' : '/') + targetHash + loc.search;
+      window.location.replace(targetUrl);
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to CampusKart...</p>
+  </body>
+</html>
